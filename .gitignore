@@ -1,14 +1,26 @@
-# Ignore Python cache
+# Byte‑compiled and cache
 __pycache__/
-*.pyc
+*.py[cod]
+*~
 
-# Ignore virtual environments
+# Virtual environments
 venv/
 env/
 
-# Ignore Jupyter notebook checkpoints
+# Jupyter and VSCode
 .ipynb_checkpoints/
+.vscode/
 
-# Ignore OS files
+# Data files (raw & processed)
+data/*.csv
+
+# Reports and outputs
+reports/*.pdf
+reports/*.html
+
+# Logs
+*.log
+
+# System files
 .DS_Store
 Thumbs.db
