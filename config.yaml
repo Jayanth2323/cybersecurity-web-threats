@@ -1,0 +1,5 @@
+paths:
+  raw_data: data/CloudWatch_Traffic_Web_Attack.csv
+  output:   data/analyzed_output.csv
+model:
+  contamination: 0.05
