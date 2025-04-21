@@ -1,0 +1,10 @@
+Model Evaluation Report
+------------------------------
+precision: 0.6667
+recall: 0.8000
+f1: 0.7273
+roc_auc: 0.7000
+------------------------------
+Evaluation complete.
+Thank you for using the model evaluation tool.
+If you have any questions or feedback, please reach out.
