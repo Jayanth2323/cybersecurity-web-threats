@@ -4,12 +4,13 @@ from sklearn.preprocessing import StandardScaler
 
 
 def build_nn_model(input_dim):
-    model = Sequential()
-    model.add(Dense(64, input_dim=input_dim, activation='relu'))
-    model.add(Dense(32, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
+    model = Sequential([
+        Dense(64, activation='relu', input_dim=input_dim),
+        Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
     model.compile(
-        loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     return model
 
 

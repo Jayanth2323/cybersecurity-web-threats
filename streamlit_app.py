@@ -11,6 +11,10 @@ st.set_page_config(page_title="Threat Dashboard", layout="wide")
 
 # Title
 st.title("🔐 Suspicious Web Threat Interactions Dashboard")
+st.markdown(
+    """Welcome to the cybersecurity threat detection system.
+    Use the sidebar to explore different views of the project."""
+)
 
 
 # Load Data
@@ -28,7 +32,8 @@ df = load_data()
 if df.empty:
     st.warning(
         """No data loaded. Please ensure
-        'analyzed_output.csv' exists and has valid data.""")
+        'analyzed_output.csv' exists and has valid data."""
+    )
     st.stop()
 
 # Feature Columns
@@ -62,6 +67,31 @@ else:
     )
 
 # Sidebar filters
+with st.sidebar:
+    st.markdown("# Advanced Filters")
+    status_options = df["anomaly"].unique().tolist()
+    status = st.multiselect(
+        "Anomaly Status", status_options, default=status_options
+    )
+packet_range = st.slider(
+    "Avg Packet Size Range",
+    min_value=float(df["avg_packet_size"].min()),
+    max_value=float(df["avg_packet_size"].max()),
+    value=(
+        float(df["avg_packet_size"].min()),
+        float(df["avg_packet_size"].max()),
+    ),
+)
+
+# Filtering
+filtered_df = df[
+    df["anomaly"].isin(status)
+    & df["avg_packet_size"].between(packet_range[0], packet_range[1])
+].copy()
+
+# Summary
+with st.expander("📊 Statistical Summary"):
+    st.write(filtered_df.describe())
 st.sidebar.header("🔎 Filter Options")
 
 status_options = df["anomaly"].dropna().unique().tolist()
@@ -155,7 +185,8 @@ if not filtered_df.empty:
         y="bytes_out",
         hue="anomaly",
         palette="Set1",
-        ax=ax,)
+        ax=ax,
+    )
     st.pyplot(fig)
 else:
     st.info("No data available for scatterplot with the current filters.")
