@@ -1,3 +1,4 @@
+from pyexpat import features
 import streamlit as st
 import pandas as pd
 import seaborn as sns
@@ -23,6 +24,20 @@ def load_data():
 
 
 df = load_data()
+
+model_choice = st.sidebar.radio(
+    "🧠 Select Model", ["Random Forest", "Neural Network"])
+
+if model_choice == "Random Forest":
+    # existing model_train logic
+    from src.model_train import train_anomaly_model
+    df = train_anomaly_model(df, features)
+else:
+    from models.nn_model import preprocess_and_train_nn
+    X = df[features]
+    y = df["anomaly"].apply(lambda x: 1 if x == "Suspicious" else 0)
+    nn_model, scaler = preprocess_and_train_nn(X, y)
+    # Optional: add prediction to df using `nn_model.predict(...)`
 
 if df.empty:
     st.warning("""No data loaded.
@@ -62,6 +77,9 @@ filtered_df = df[
     df["anomaly"].isin(status) &
     df["avg_packet_size"].between(packet_range[0], packet_range[1])
 ].copy()
+
+with st.expander("📊 Statistical Summary"):
+    st.write(filtered_df.describe())
 
 if countries:
     filtered_df = filtered_df[
