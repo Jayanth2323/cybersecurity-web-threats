@@ -30,6 +30,7 @@ notebook==7.4.0
 notebook_shim==0.2.4
 pandocfilters==1.5.1
 prometheus_client==0.21.1
+pywin32==310
 pywinpty==2.0.15
 python-json-logger==3.3.0
 pyzmq==26.4.0
