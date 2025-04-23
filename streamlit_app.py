@@ -175,6 +175,7 @@ filtered_df = df[
 for field, values in selected_values.items():
     if values:
         filtered_df = filtered_df[filtered_df[field].isin(values)]
+        st.write(f"Applied filter: {field} = {values}")
 
 # Summary
 with st.expander("📊 Statistical Summary"):
