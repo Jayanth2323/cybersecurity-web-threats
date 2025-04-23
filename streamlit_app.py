@@ -147,7 +147,9 @@ st.sidebar.header("🔎 Filter Options")
 
 status_options = df["anomaly"].dropna().unique().tolist()
 status = st.sidebar.multiselect(
-    "Anomaly Status", status_options, default=status_options
+    "Anomaly Status", status_options, default=status_options,
+    key="status_filter_1",
+    help="Select the anomaly status to filter the data"
 )
 
 country_options = df["src_ip_country_code"].dropna().unique().tolist()
