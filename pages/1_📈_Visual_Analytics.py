@@ -19,8 +19,11 @@ df_suspicious = df[df["anomaly"] == "Suspicious"]
 
 # 🌍 Choropleth Map
 st.subheader("🗺️ Suspicious Activities by Country")
-country_counts = df_suspicious.groupby(
-    "src_ip_country_code").size().reset_index(name="count")
+country_counts = (
+    df_suspicious.groupby("src_ip_country_code")
+    .size()
+    .reset_index(name="count")
+)
 
 if not country_counts.empty:
     fig_map = px.choropleth(
@@ -29,7 +32,8 @@ if not country_counts.empty:
         locationmode="ISO-3",
         color="count",
         color_continuous_scale="Reds",
-        title="Suspicious IPs by Country"
+        title="Suspicious IPs by Country",
+        hover_name="src_ip_country_code",
     )
     st.plotly_chart(fig_map, use_container_width=True)
 else:
@@ -40,9 +44,26 @@ st.subheader("📈 Anomaly Scatterplot: Bytes In vs Out")
 
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.scatterplot(
-    data=df, x="bytes_in", y="bytes_out", hue="anomaly", palette="Set1", ax=ax)
+    data=df, x="bytes_in", y="bytes_out", hue="anomaly", palette="Set1", ax=ax
+)
+ax.set_xlabel("Bytes In")
+ax.set_ylabel("Bytes Out")
+ax.set_title("Anomaly Scatterplot")
 st.pyplot(fig)
 
 # 📊 Descriptive Statistics
 st.subheader("📊 Statistical Summary")
 st.write(df.describe())
+
+# Additional statistics
+st.subheader("📊 Additional Statistics")
+st.write(df.groupby("anomaly").describe())
+
+# Data distribution
+st.subheader("📊 Data Distribution")
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.histplot(data=df, x="bytes_in", hue="anomaly", palette="Set1", ax=ax)
+ax.set_xlabel("Bytes In")
+ax.set_ylabel("Frequency")
+ax.set_title("Data Distribution")
+st.pyplot(fig)
