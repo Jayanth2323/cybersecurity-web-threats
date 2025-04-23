@@ -5,6 +5,60 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import io
 
+# streamlit_app.py (Home Page)
+
+st.set_page_config(page_title="Threat Dashboard", layout="wide")
+
+st.markdown("""
+# 🔐 Suspicious Web Threat Interactions
+Welcome to the enterprise-grade cybersecurity analytics system.
+Navigate the sections using the sidebar.
+""")
+
+st.markdown("""
+### 📌 Dashboard Highlights:
+- Real-time anomaly detection using ML & Deep Learning
+- Country-wise threat heatmaps
+- Packet size analytics and protocol filters
+- Exportable reports and model comparison
+- Correlation matrix and time-series traffic visualizations
+- Source-Destination IP network graph
+- ROC & AUC comparisons for model benchmarking
+- 100% CI/CD tested and Streamlit Cloud ready
+""")
+
+st.markdown("""
+#### 📁 Project Structure Summary:
+```
+📦 cybersecurity-web-threats
+├── 📄 streamlit_app.py (home)
+├── 📂 pages/
+│   ├── 1_📊_Visual_Analytics.py
+│   ├── 2_📈_Model_Insights.py
+│   ├── 3_🧠_Neural_Network.py
+│   ├── 4_📦_Protocol_Port_Analysis.py
+│   ├── 5_📊_Correlation_Heatmap.py
+│   ├── 6_📈_Time_Series_Traffic.py
+│   ├── 7_🕸️_IP_Interaction_Graph.py
+│   ├── 8_🎯_Model_Comparison.py
+│   ├── 9_📥_Export_Report.py
+│   └── 10_🧠_SHAP_Model_Explainability.py
+├── 📂 models/
+│   ├── rf_model.py
+│   └── nn_model.py
+├── 📂 data/
+│   └── analyzed_output.csv
+├── 📂 src/
+│   ├── data_cleaning.py
+│   ├── feature_engineering.py
+│   └── model_eval.py
+```
+""")
+
+st.success("""
+        You're viewing the fully interactive, modular analytics dashboard.
+        Use the sidebar to explore various threat dimensions.""")
+
 
 # Configure Streamlit page
 st.set_page_config(page_title="Threat Dashboard", layout="wide")

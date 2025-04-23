@@ -27,8 +27,8 @@ st.subheader("\ud83d\udecb\ufe0f Destination Port Distribution")
 if "dst_port" in df.columns:
     fig2, ax2 = plt.subplots(figsize=(10, 4))
     sns.histplot(
-        data=df, x="dst_port", hue="anomaly",
-        multiple="stack", bins=40, ax=ax2)
+        data=df, x="dst_port", hue="anomaly", multiple="stack", bins=40, ax=ax2
+    )
     ax2.set_title("Destination Ports - Normal vs Suspicious")
     st.pyplot(fig2)
 else:

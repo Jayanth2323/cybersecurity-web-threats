@@ -17,7 +17,7 @@ df = load_data()
 st.markdown(
     """This heatmap helps identify
     linear relationships between numeric features."""
-    )
+)
 
 numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
 
