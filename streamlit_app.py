@@ -147,12 +147,15 @@ with st.sidebar:
     )
 
 # Sidebar - dynamic field filters
+selected_values = {}
+
 if 'dest_ip_country_code' in df.columns:
     fields = ["protocol", "dest_ip_country_code"]
     some_options = {
         field: df[field].dropna().unique().tolist()
         for field in fields
-        }
+    }
+
     print(df.columns)
 
     selected_values = {}
@@ -161,9 +164,9 @@ if 'dest_ip_country_code' in df.columns:
         selected_values[field] = st.sidebar.multiselect(
             f"Select {field} Options",
             options=some_options[field],
-            default=some_options[field],  # Set default to all options
+            default=some_options[field],
             key=f"multiselect_{field}_{i}",
-            )
+        )
 
 # Filtering
 filtered_df = df[
