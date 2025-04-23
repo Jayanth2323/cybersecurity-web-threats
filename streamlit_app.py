@@ -60,9 +60,6 @@ st.success("""
         Use the sidebar to explore various threat dimensions.""")
 
 
-# Configure Streamlit page
-st.set_page_config(page_title="Threat Dashboard", layout="wide")
-
 # Title
 st.title("🔐 Suspicious Web Threat Interactions Dashboard")
 st.markdown(
