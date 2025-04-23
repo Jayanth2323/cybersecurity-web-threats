@@ -156,7 +156,7 @@ with st.sidebar:
     print(df.columns)
 
     selected_values = {}
-    fields = []
+    fields = ["protocol", "dest_ip_country_code"]
     for i, field in enumerate(fields):
         selected_values[field] = st.sidebar.multiselect(
             f"Select {field} Options",
