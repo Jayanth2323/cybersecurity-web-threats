@@ -147,11 +147,14 @@ with st.sidebar:
     )
 
     # Sidebar - dynamic field filters
-    fields = ["protocol", "dest_ip_country_code"]
-    some_options = {
-        field: df[field].dropna().unique().tolist()
-        for field in fields
-    }
+    if 'dest_ip_country_code' in df.columns:
+        fields = ["protocol", "dest_ip_country_code"]
+        some_options = {
+            field: df[field].dropna().unique().tolist()
+            for field in fields
+            }
+    print(df.columns)
+
     selected_values = {}
 
     for i, field in enumerate(fields):
