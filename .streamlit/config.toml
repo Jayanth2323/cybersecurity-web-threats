@@ -2,10 +2,10 @@
 base="dark"
 primaryColor="#ff4b4b"
 backgroundColor="#0e1117"
-secondaryBackgroundColor="#262730"
-textColor="#fafafa"
+secondaryBackgroundColor="#1c1e26"
+textColor="#ffffff"
 
 [server]
+enableCORS = false
 headless = true
 port = 8501
-enableCORS = false
