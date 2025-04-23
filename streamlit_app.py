@@ -9,13 +9,16 @@ import io
 
 st.set_page_config(page_title="Threat Dashboard", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 # 🔐 Suspicious Web Threat Interactions
 Welcome to the enterprise-grade cybersecurity analytics system.
 Navigate the sections using the sidebar.
-""")
+"""
+)
 
-st.markdown("""
+st.markdown(
+    """
 ### 📌 Dashboard Highlights:
 - Real-time anomaly detection using ML & Deep Learning
 - Country-wise threat heatmaps
@@ -25,9 +28,11 @@ st.markdown("""
 - Source-Destination IP network graph
 - ROC & AUC comparisons for model benchmarking
 - 100% CI/CD tested and Streamlit Cloud ready
-""")
+"""
+)
 
-st.markdown("""
+st.markdown(
+    """
 #### 📁 Project Structure Summary:
 ```
 📦 cybersecurity-web-threats
@@ -53,18 +58,23 @@ st.markdown("""
 │   ├── feature_engineering.py
 │   └── model_eval.py
 ```
-""")
+"""
+)
 
-st.success("""
+
+st.success(
+    """
         You're viewing the fully interactive, modular analytics dashboard.
-        Use the sidebar to explore various threat dimensions.""")
-
+        Use the sidebar to explore various threat dimensions."""
+)
 
 # Title
 st.title("🔐 Suspicious Web Threat Interactions Dashboard")
 st.markdown(
-    """Welcome to the cybersecurity threat detection system.
-    Use the sidebar to explore different views of the project."""
+    """
+Welcome to the cybersecurity threat detection system.
+Use the sidebar to explore different views of the project.
+"""
 )
 
 
@@ -82,8 +92,9 @@ df = load_data()
 
 if df.empty:
     st.warning(
-        """No data loaded. Please ensure
-        'analyzed_output.csv' exists and has valid data."""
+        """
+    No data loaded. Please ensure
+    'analyzed_output.csv' exists and has valid data."""
     )
     st.stop()
 
@@ -124,29 +135,29 @@ with st.sidebar:
     status = st.multiselect(
         "Anomaly Status", status_options, default=status_options
     )
-packet_range = st.slider(
-    "Avg Packet Size Range",
-    min_value=float(df["avg_packet_size"].min()),
-    max_value=float(df["avg_packet_size"].max()),
-    value=(
-        float(df["avg_packet_size"].min()),
-        float(df["avg_packet_size"].max()),
-    ),
-)
 
-# Sidebar - dynamic field filters
-fields = ["protocol", "dest_ip_country_code"]
-some_options = {
-    field: df[field].dropna().unique().tolist()
-    for field in fields}
-selected_values = {}
-
-for i, field in enumerate(fields):
-    selected_values[field] = st.sidebar.multiselect(
-        f"Select {field} Options",
-        options=some_options[field],
-        key=f"multiselect_{field}_{i}"
+    packet_range = st.slider(
+        "Avg Packet Size Range",
+        min_value=float(df["avg_packet_size"].min()),
+        max_value=float(df["avg_packet_size"].max()),
+        value=(
+            float(df["avg_packet_size"].min()),
+            float(df["avg_packet_size"].max()),
+        ),
     )
+
+    # Sidebar - dynamic field filters
+    fields = ["protocol", "dest_ip_country_code"]
+    some_options = {
+        field: df[field].dropna().unique().tolist() for field in fields
+    }
+    selected_values = {}
+
+    for i, field in enumerate(fields):
+        selected_values[field] = st.sidebar.multiselect(
+            f"Select {field} Options",
+            options=some_options[field],
+            key=f"multiselect_{field}_{i}",)
 
 # Filtering
 filtered_df = df[
@@ -154,44 +165,12 @@ filtered_df = df[
     & df["avg_packet_size"].between(packet_range[0], packet_range[1])
 ].copy()
 
+# Apply selected filters for dynamic fields
+for field, values in selected_values.items():
+    if values:
+        filtered_df = filtered_df[filtered_df[field].isin(values)]
+
 # Summary
-with st.expander("📊 Statistical Summary"):
-    st.write(filtered_df.describe())
-st.sidebar.header("🔎 Filter Options")
-
-status_options = df["anomaly"].dropna().unique().tolist()
-status = st.sidebar.multiselect(
-    "Anomaly Status", status_options, default=status_options,
-    key="status_filter_1",
-    help="Select the anomaly status to filter the data"
-)
-
-country_options = df["src_ip_country_code"].dropna().unique().tolist()
-countries = st.sidebar.multiselect("Source Countries", country_options)
-
-# Packet size slider
-st.sidebar.subheader("📦 Avg Packet Size")
-min_val = float(df["avg_packet_size"].min())
-max_val = float(df["avg_packet_size"].max())
-packet_range = st.sidebar.slider(
-    "Select packet size range",
-    min_value=min_val,
-    max_value=max_val,
-    value=(min_val, max_val),
-)
-
-# Apply filters
-filtered_df = df[
-    df["anomaly"].isin(status)
-    & df["avg_packet_size"].between(packet_range[0], packet_range[1])
-].copy()
-
-if countries:
-    filtered_df = filtered_df[
-        filtered_df["src_ip_country_code"].isin(countries)
-    ]
-
-# Stats Panel
 with st.expander("📊 Statistical Summary"):
     st.write(filtered_df.describe())
 
