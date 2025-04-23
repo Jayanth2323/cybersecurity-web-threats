@@ -34,33 +34,30 @@ st.markdown(
 st.markdown(
     """
 #### 📁 Project Structure Summary:
-```
 📦 cybersecurity-web-threats
 ├── 📄 streamlit_app.py (home)
-├── 📂 pages/
-│   ├── 1_📊_Visual_Analytics.py
-│   ├── 2_📈_Model_Insights.py
-│   ├── 3_🧠_Neural_Network.py
-│   ├── 4_📦_Protocol_Port_Analysis.py
-│   ├── 5_📊_Correlation_Heatmap.py
-│   ├── 6_📈_Time_Series_Traffic.py
-│   ├── 7_🕸️_IP_Interaction_Graph.py
-│   ├── 8_🎯_Model_Comparison.py
-│   ├── 9_📥_Export_Report.py
-│   └── 10_🧠_SHAP_Model_Explainability.py
-├── 📂 models/
-│   ├── rf_model.py
-│   └── nn_model.py
-├── 📂 data/
-│   └── analyzed_output.csv
-├── 📂 src/
-│   ├── data_cleaning.py
-│   ├── feature_engineering.py
-│   └── model_eval.py
-```
+├── 📂 pages/ 
+│ ├── 1_📊_Visual_Analytics.py 
+│ ├── 2_📈_Model_Insights.py 
+│ ├── 3_🧠_Neural_Network.py 
+│ ├── 4_📦_Protocol_Port_Analysis.py 
+│ ├── 5_📊_Correlation_Heatmap.py 
+│ ├── 6_📈_Time_Series_Traffic.py 
+│ ├── 7_🕸️_IP_Interaction_Graph.py 
+│ ├── 8_🎯_Model_Comparison.py 
+│ ├── 9_📥_Export_Report.py 
+│ └── 10_🧠_SHAP_Model_Explainability.py 
+├── 📂 models/ 
+│ ├── rf_model.py 
+│ └── nn_model.py 
+├── 📂 data/ 
+│ └── analyzed_output.csv 
+├── 📂 src/ 
+│ ├── data_cleaning.py 
+│ ├── feature_engineering.py 
+│ └── model_eval.py
 """
 )
-
 
 st.success(
     """
@@ -147,22 +144,20 @@ with st.sidebar:
     )
 
     # Sidebar - dynamic field filters
-    if 'dest_ip_country_code' in df.columns:
-        fields = ["protocol", "dest_ip_country_code"]
-        some_options = {
-            field: df[field].dropna().unique().tolist()
-            for field in fields
-            }
-    print(df.columns)
-
     selected_values = {}
     fields = []
+    if "dest_ip_country_code" in df.columns:
+        fields = ["protocol", "dest_ip_country_code"]
+        some_options = {
+            field: df[field].dropna().unique().tolist() for field in fields
+        }
+
     for i, field in enumerate(fields):
         selected_values[field] = st.sidebar.multiselect(
             f"Select {field} Options",
             options=some_options[field],
             key=f"multiselect_{field}_{i}",
-            )
+        )
 
 # Filtering
 filtered_df = df[
