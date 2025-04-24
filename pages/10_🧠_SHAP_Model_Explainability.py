@@ -78,6 +78,8 @@ st.markdown(f"**Prediction for this row:** `{label}`")
 # SHAP Force Plot (v0.20+ compliant)
 st.markdown("### SHAP Force Plot Explanation")
 shap.initjs()
+
+sample_shap = shap_values[selected_index]
 base_value = explainer.expected_value
 if isinstance(base_value, (list, np.ndarray)):
     base_value = base_value[0]
