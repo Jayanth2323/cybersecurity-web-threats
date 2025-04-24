@@ -14,28 +14,38 @@ from sklearn.metrics import (
 )
 
 st.set_page_config(page_title="SHAP Explainability", layout="wide")
-st.title(" SHAP Explainability: Why This Was Flagged")
+st.title("🧠 SHAP Explainability: Why This Was Flagged")
 
 
 # Load & clean data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/analyzed_output.csv")
-    df = df.dropna(
-        subset=[
-            "anomaly",
-            "bytes_in",
-            "bytes_out",
-            "duration_seconds",
-            "avg_packet_size",
-        ]
-    )
-    le = LabelEncoder()
-    df["anomaly_binary"] = le.fit_transform(df["anomaly"])
-    return df
+    try:
+        df = pd.read_csv("data/analyzed_output.csv")
+        df = df.dropna(
+            subset=[
+                "anomaly",
+                "bytes_in",
+                "bytes_out",
+                "duration_seconds",
+                "avg_packet_size",
+            ]
+        )
+        le = LabelEncoder()
+        df["anomaly_binary"] = le.fit_transform(df["anomaly"])
+        return df
+    except FileNotFoundError:
+        st.error(
+            """Error: The file 'data/analyzed_output.csv' was not found.
+            Please make sure the file is in the correct location."""
+        )
+        return None
 
 
 df = load_data()
+if df is None:
+    st.stop()
+
 features = ["bytes_in", "bytes_out", "duration_seconds", "avg_packet_size"]
 X = df[features]
 y = df["anomaly_binary"]
@@ -49,7 +59,7 @@ model.fit(X_train, y_train)
 
 # Evaluation
 y_pred = model.predict(X_test)
-st.markdown("### Model Evaluation")
+st.markdown("### 📊 Model Evaluation")
 st.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.2f}")
 st.text("Classification Report:")
 st.text(classification_report(y_test, y_pred))
@@ -57,11 +67,11 @@ st.text("Confusion Matrix:")
 st.write(confusion_matrix(y_test, y_pred))
 
 # SHAP
-explainer = shap.Explainer(model, X_train)
-shap_values = explainer(X_test)
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test)
 
 # Sample selection
-st.markdown("### Select a Sample for Explanation")
+st.markdown("### 🔎 Select a Sample for Explanation")
 selected_index = st.number_input(
     f"Row Index (0 - {len(X_test) - 1})",
     min_value=0,
@@ -73,37 +83,23 @@ sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for selected row:** `{label}`")
 
-# SHAP Explanation (Safe Static Plot)
-st.markdown("### SHAP Force Plot (Static)")
-sample_shap = shap_values[selected_index]
-base_value = (
-    explainer.expected_value[0]
-    if isinstance(explainer.expected_value, (list, np.ndarray))
-    else explainer.expected_value
-)
-
-explanation = shap.Explanation(
-    values=sample_shap.values,
-    base_values=base_value,
-    data=sample.values[0],
-    feature_names=sample.columns.tolist(),
-)
-
-fig, ax = plt.subplots(figsize=(10, 1))
-shap.plots.force(
-    base_value=explanation.base_values,
-    shap_values=explanation.values,
-    features=explanation.data,
-    feature_names=explanation.feature_names,
-    matplotlib=False,
+# SHAP Explanation (Static Plot)
+st.markdown("### 📉 SHAP Force Plot (Static)")
+plt.figure()
+shap.force_plot(
+    explainer.expected_value[1],  # Using index 1 for class 1 (anomaly)
+    shap_values[1][selected_index],  # SHAP values for class 1
+    sample.iloc[0],  # Pass the first row as a Series
+    matplotlib=True,
     show=False,
 )
-plt.tight_layout()
-st.pyplot(fig)
+st.pyplot(plt.gcf(), bbox_inches="tight")
+plt.clf()
 
 # Top Features Chart
-with st.expander("Top Contributing Features", expanded=False):
-    shap_row = shap_values[selected_index].values
+with st.expander("📊 Top Contributing Features", expanded=False):
+    # For binary classification, we'll use the SHAP values for class 1
+    shap_row = shap_values[1][selected_index]
     abs_shap_values = np.abs(shap_row)
     feature_importance = pd.DataFrame(
         {
@@ -113,41 +109,40 @@ with st.expander("Top Contributing Features", expanded=False):
         }
     ).sort_values(by="Absolute SHAP", ascending=False)
 
-# Summary Plot
-with st.expander("SHAP Summary Plot (All Samples)"):
-    summary_df = pd.DataFrame(shap_values.values, columns=X_test.columns)
-    summary_df["Predicted"] = model.predict(X_test)
-    melted = summary_df.melt(
-        id_vars="Predicted", var_name="Feature", value_name="SHAP Value"
-    )
-
-    fig_summary = px.strip(
-        melted,
+    fig_bar = px.bar(
+        feature_importance,
         x="SHAP Value",
         y="Feature",
-        color="Predicted",
-        title="SHAP Summary (All Samples)",
         orientation="h",
-        stripmode="overlay",
+        title="Top Contributing Features",
+        color="SHAP Value",
+        color_continuous_scale="RdBu",
     )
-    st.plotly_chart(fig_summary, use_container_width=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+# Summary Plot
+with st.expander("📈 SHAP Summary Plot (All Samples)"):
+    plt.figure()
+    shap.summary_plot(shap_values[1], X_test, show=False)
+    st.pyplot(plt.gcf(), bbox_inches="tight")
+    plt.clf()
 
 
 # SHAP CSV Export
 @st.cache_data
 def get_shap_values_df():
-    return pd.DataFrame(shap_values.values, columns=X_test.columns)
+    return pd.DataFrame(shap_values[1], columns=X_test.columns)
 
 
 shap_values_df = get_shap_values_df()
 csv = shap_values_df.to_csv(index=False)
 st.download_button(
-    label="Download SHAP Values (CSV)",
+    label="📥 Download SHAP Values (CSV)",
     data=csv,
     file_name="shap_values.csv",
     mime="text/csv",
 )
 
 # Optional full table
-if st.button("Show All SHAP Values Table"):
+if st.button("🧾 Show All SHAP Values Table"):
     st.write(shap_values_df)
