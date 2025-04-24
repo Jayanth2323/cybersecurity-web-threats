@@ -82,16 +82,29 @@ base_value = explainer.expected_value
 if isinstance(base_value, (list, np.ndarray)):
     base_value = base_value[0]
 
+sample_shap = shap.Explanation(
+    values=shap_values.values[selected_index],
+    base_values=shap_values.base_values[selected_index],
+    data=sample.values[0],
+    feature_names=sample.columns.tolist()
+)
+
 force_plot = shap.force_plot(
-    base_value,
-    shap_values[selected_index],
-    sample,
-    feature_names=sample.columns,
+    sample_shap.base_values,
+    sample_shap.values,
+    sample_shap.data,
+    feature_names=sample_shap.feature_names,
     matplotlib=False,
 )
 
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
+
+# try:
+#     components.html(shap_html, height=300)
+# except Exception as e:
+#     st.error(f"Error rendering SHAP force plot: {e}")
+
 
 # Top contributing features (Bar Chart)
 with st.expander(
