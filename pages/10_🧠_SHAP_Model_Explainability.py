@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import shap
+import numpy as np
+import plotly.express as px
 import streamlit.components.v1 as components
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -12,7 +14,7 @@ from sklearn.metrics import (
 )
 
 st.set_page_config(page_title="SHAP Explainability", layout="wide")
-st.title(" SHAP Explainability: Why This Was Flagged")
+st.title("🧠 SHAP Explainability: Why This Was Flagged")
 
 
 @st.cache_data
@@ -68,7 +70,7 @@ selected_index = st.number_input(
 )
 
 # Display Prediction
-sample = X_test.iloc[[selected_index]]  # Keep as 2D
+sample = X_test.iloc[[selected_index]]
 sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
@@ -76,36 +78,81 @@ st.markdown(f"**Prediction for this row:** `{label}`")
 # SHAP Force Plot (v0.20+ compliant)
 st.markdown("### SHAP Force Plot Explanation")
 shap.initjs()
+base_value = explainer.expected_value
+if isinstance(base_value, (list, np.ndarray)):
+    base_value = base_value[0]
 
-# Use base value and single row SHAP values for the force plot
 force_plot = shap.force_plot(
-    explainer.expected_value,
+    base_value,
     shap_values[selected_index],
     sample,
     feature_names=sample.columns,
     matplotlib=False,
 )
 
-# Render SHAP force plot as HTML
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
 
+# Top contributing features (Bar Chart)
+with st.expander(
+    "📊 View Top Contributing Features (Bar Chart)", expanded=False
+):
+    shap_row = shap_values[selected_index].values
+    abs_shap_values = np.abs(shap_row)
+    feature_importance = pd.DataFrame(
+        {
+            "Feature": sample.columns,
+            "SHAP Value": shap_row,
+            "Absolute SHAP": abs_shap_values,
+        }
+    ).sort_values(by="Absolute SHAP", ascending=False)
 
-# Add a download button for the SHAP values
+    fig = px.bar(
+        feature_importance,
+        x="SHAP Value",
+        y="Feature",
+        orientation="h",
+        title="Top Contributing Features (Single Sample)",
+        color="SHAP Value",
+        color_continuous_scale="RdBu",
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# SHAP Summary Plot (Interactive Plotly)
+with st.expander("📈 SHAP Summary Plot (All Samples)"):
+    summary_df = pd.DataFrame(shap_values.values, columns=X_test.columns)
+    summary_df["Predicted"] = model.predict(X_test)
+    melted = summary_df.melt(
+        id_vars="Predicted", var_name="Feature", value_name="SHAP Value"
+    )
+
+    fig_summary = px.strip(
+        melted,
+        x="SHAP Value",
+        y="Feature",
+        color="Predicted",
+        title="SHAP Summary Plot (Interactive)",
+        orientation="h",
+        stripmode="overlay",
+    )
+    st.plotly_chart(fig_summary, use_container_width=True)
+
+
+# SHAP CSV Export
 @st.cache_data
-def get_shap_values():
-    return shap_values
+def get_shap_values_df():
+    return pd.DataFrame(shap_values.values, columns=X_test.columns)
 
 
-shap_values_df = get_shap_values()
+shap_values_df = get_shap_values_df()
 csv = shap_values_df.to_csv(index=False)
 st.download_button(
-    label="Download SHAP values as CSV",
+    label="📥 Download SHAP values as CSV",
     data=csv,
     file_name="shap_values.csv",
     mime="text/csv",
 )
 
-# Add a button to display the SHAP values as a table
-if st.button("Display SHAP values"):
+# Display SHAP Table
+if st.button("🧾 Display All SHAP Values (Table View)"):
     st.write(shap_values_df)
