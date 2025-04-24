@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-st.title("\ud83d\udcc8 Time Series: Traffic Over Time")
+st.title("📈 Time Series: Traffic Over Time")
 
 
 @st.cache_data

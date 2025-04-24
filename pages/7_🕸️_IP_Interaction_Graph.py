@@ -4,7 +4,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 
-st.title("\ud83d\udd78\ufe0f IP Interaction Network")
+st.title("🕸️ IP Interaction Network")
 
 
 @st.cache_data

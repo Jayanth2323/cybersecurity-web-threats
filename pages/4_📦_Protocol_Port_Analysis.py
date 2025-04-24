@@ -23,7 +23,7 @@ if "protocol" in df.columns:
 else:
     st.warning("Protocol column not found in dataset.")
 
-st.subheader("\ud83d\udecb\ufe0f Destination Port Distribution")
+st.subheader("📫 Destination Port Distribution")
 if "dst_port" in df.columns:
     fig2, ax2 = plt.subplots(figsize=(10, 4))
     sns.histplot(

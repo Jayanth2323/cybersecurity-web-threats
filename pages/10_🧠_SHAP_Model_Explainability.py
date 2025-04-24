@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import shap
-
-# import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -13,7 +12,7 @@ from sklearn.metrics import (
 )
 
 st.set_page_config(page_title="SHAP Explainability", layout="wide")
-st.title(" SHAP Explainability: Why This Was Flagged")
+st.title("🔍 SHAP Explainability: Why This Was Flagged")
 
 
 @st.cache_data
@@ -47,11 +46,11 @@ model.fit(X_train, y_train)
 
 # Model Evaluation
 y_pred = model.predict(X_test)
-st.write("Model Evaluation:")
-st.write("Accuracy:", accuracy_score(y_test, y_pred))
-st.write("Classification Report:")
-st.write(classification_report(y_test, y_pred))
-st.write("Confusion Matrix:")
+st.write("### 📊 Model Evaluation:")
+st.write("**Accuracy:**", accuracy_score(y_test, y_pred))
+st.text("Classification Report:")
+st.text(classification_report(y_test, y_pred))
+st.text("Confusion Matrix:")
 st.write(confusion_matrix(y_test, y_pred))
 
 # SHAP explainer
@@ -59,12 +58,13 @@ explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
 
 # Row selector
-st.markdown("###  Select a Sample for Explanation")
+st.markdown("### 🧪 Select a Sample for Explanation")
 selected_index = st.number_input(
-    "Select Row Index (0 - {})".format(len(X_test) - 1),
+    f"Select Row Index (0 - {len(X_test) - 1})",
     min_value=0,
     max_value=len(X_test) - 1,
     step=1,
+    key="row_index",
 )
 
 # Display Prediction
@@ -73,15 +73,13 @@ label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
 # SHAP Force Plot
-st.markdown("###  SHAP Force Plot Explanation")
+st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
-st_shap = st.empty()
-st_shap.components.v1.html(
-    shap.plots.force(
-        explainer.expected_value[1],
-        shap_values[selected_index].values,
-        X_test.iloc[selected_index],
-        matplotlib=False,
-    ).html(),
-    height=300,
-)
+html = shap.plots.force(
+    explainer.expected_value[1],
+    shap_values[selected_index].values,
+    X_test.iloc[selected_index],
+    matplotlib=False,
+).html()
+
+components.html(html, height=300)
