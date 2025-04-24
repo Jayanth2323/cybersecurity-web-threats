@@ -78,32 +78,81 @@ selected_index = st.number_input(
     max_value=len(X_test) - 1,
     step=1,
 )
-sample = X_test.iloc[[selected_index]]
+sample = X_test.iloc[selected_index:selected_index + 1]
 sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for selected row:** `{label}`")
 
 # SHAP Explanation (Static Plot)
+# SHAP Explanation (Static Plot)
 st.markdown("### 📉 SHAP Force Plot (Static)")
 plt.figure()
+try:
+    # Debugging info
+    st.write(
+        f"""
+        SHAP values shape for sample:
+        {np.array(shap_values[1][selected_index]).shape}"""
+        )
+    st.write(f"Sample values shape:{sample.iloc[0].values.shape}")
+    st.write(
+        f"Expected value shape:{np.array(explainer.expected_value[1]).shape}"
+    )
+
+    # Create the force plot for single sample
+    shap.force_plot(
+        explainer.expected_value[1],  # Base value for class 1
+        shap_values[1][selected_index, :],  # SHAP values for this sample
+        sample.iloc[0].values,  # Feature values
+        feature_names=features,
+        matplotlib=True,
+        show=False,
+    )
+    st.pyplot(plt.gcf(), bbox_inches="tight")
+    plt.clf()
+
+    # Alternative: Create force plot for all samples (commented out)
+    # plt.figure()
+    # shap.force_plot(
+    #     explainer.expected_value[1],
+    #     shap_values[1],
+    #     X_test,
+    #     feature_names=features,
+    #     matplotlib=True,
+    #     show=False,
+    # )
+    # st.pyplot(plt.gcf(), bbox_inches="tight")
+    # plt.clf()
+
+except Exception as e:
+    st.error(f"Error generating SHAP plot: {str(e)}")
+    st.error("Common causes:")
+    st.error("- Mismatch between SHAP values and feature dimensions")
+    st.error("- Incorrect indexing of SHAP values array")
+    st.error("- Try updating SHAP library: pip install --upgrade shap")
+
+
 shap.force_plot(
-    explainer.expected_value[1],  # Using index 1 for class 1 (anomaly)
-    shap_values[1][selected_index],  # SHAP values for class 1
-    sample.iloc[0],  # Pass the first row as a Series
+    explainer.expected_value[1],
+    shap_values[1],
+    X_test,
+    feature_names=features,
     matplotlib=True,
     show=False,
+    link="logit",
 )
-st.pyplot(plt.gcf(), bbox_inches="tight")
-plt.clf()
+
+
+st.write(f"Sample values shape: {sample.iloc[0].values.shape}")
+
 
 # Top Features Chart
 with st.expander("📊 Top Contributing Features", expanded=False):
-    # For binary classification, we'll use the SHAP values for class 1
     shap_row = shap_values[1][selected_index]
     abs_shap_values = np.abs(shap_row)
     feature_importance = pd.DataFrame(
         {
-            "Feature": sample.columns,
+            "Feature": features,
             "SHAP Value": shap_row,
             "Absolute SHAP": abs_shap_values,
         }
@@ -131,7 +180,7 @@ with st.expander("📈 SHAP Summary Plot (All Samples)"):
 # SHAP CSV Export
 @st.cache_data
 def get_shap_values_df():
-    return pd.DataFrame(shap_values[1], columns=X_test.columns)
+    return pd.DataFrame(shap_values[1], columns=features)
 
 
 shap_values_df = get_shap_values_df()
