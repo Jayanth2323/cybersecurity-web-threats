@@ -14,7 +14,7 @@ from sklearn.metrics import (
 )
 
 st.set_page_config(page_title="SHAP Explainability", layout="wide")
-st.title("🧠 SHAP Explainability: Why This Was Flagged")
+st.title(" SHAP Explainability: Why This Was Flagged")
 
 
 # Load & clean data
@@ -49,7 +49,7 @@ model.fit(X_train, y_train)
 
 # Evaluation
 y_pred = model.predict(X_test)
-st.markdown("### 📊 Model Evaluation")
+st.markdown("### Model Evaluation")
 st.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.2f}")
 st.text("Classification Report:")
 st.text(classification_report(y_test, y_pred))
@@ -61,7 +61,7 @@ explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
 
 # Sample selection
-st.markdown("### 🔎 Select a Sample for Explanation")
+st.markdown("### Select a Sample for Explanation")
 selected_index = st.number_input(
     f"Row Index (0 - {len(X_test) - 1})",
     min_value=0,
@@ -74,7 +74,7 @@ label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for selected row:** `{label}`")
 
 # SHAP Explanation (Safe Static Plot)
-st.markdown("### 📉 SHAP Force Plot (Static)")
+st.markdown("### SHAP Force Plot (Static)")
 sample_shap = shap_values[selected_index]
 base_value = (
     explainer.expected_value[0]
@@ -91,18 +91,18 @@ explanation = shap.Explanation(
 
 fig, ax = plt.subplots(figsize=(10, 1))
 shap.plots.force(
-    base_value=explanation.base_values,  # Corrected order of arguments
+    base_value=explanation.base_values,
     shap_values=explanation.values,
     features=explanation.data,
     feature_names=explanation.feature_names,
-    matplotlib=True,
+    matplotlib=False,
     show=False,
 )
 plt.tight_layout()
 st.pyplot(fig)
 
 # Top Features Chart
-with st.expander("📊 Top Contributing Features", expanded=False):
+with st.expander("Top Contributing Features", expanded=False):
     shap_row = shap_values[selected_index].values
     abs_shap_values = np.abs(shap_row)
     feature_importance = pd.DataFrame(
@@ -113,19 +113,8 @@ with st.expander("📊 Top Contributing Features", expanded=False):
         }
     ).sort_values(by="Absolute SHAP", ascending=False)
 
-    fig_bar = px.bar(
-        feature_importance,
-        x="SHAP Value",
-        y="Feature",
-        orientation="h",
-        title="Top Contributing Features",
-        color="SHAP Value",
-        color_continuous_scale="RdBu",
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
 # Summary Plot
-with st.expander("📈 SHAP Summary Plot (All Samples)"):
+with st.expander("SHAP Summary Plot (All Samples)"):
     summary_df = pd.DataFrame(shap_values.values, columns=X_test.columns)
     summary_df["Predicted"] = model.predict(X_test)
     melted = summary_df.melt(
@@ -153,12 +142,12 @@ def get_shap_values_df():
 shap_values_df = get_shap_values_df()
 csv = shap_values_df.to_csv(index=False)
 st.download_button(
-    label="📥 Download SHAP Values (CSV)",
+    label="Download SHAP Values (CSV)",
     data=csv,
     file_name="shap_values.csv",
     mime="text/csv",
 )
 
 # Optional full table
-if st.button("🧾 Show All SHAP Values Table"):
+if st.button("Show All SHAP Values Table"):
     st.write(shap_values_df)
