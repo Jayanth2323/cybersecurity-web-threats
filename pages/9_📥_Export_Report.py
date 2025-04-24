@@ -116,11 +116,11 @@ st.subheader("🧠 Neural Network Metrics")
 show_metrics("Neural Network", y_test, nn_pred, nn_prob)
 
 # SHAP Analysis Section
-st.header("🔍 Model Explainability with SHAP")
+# st.header("🔍 Model Explainability with SHAP")
 
 # Sample selection
 sample_idx = st.slider("Select sample to explain", 0, len(X_test) - 1, 0)
-sample = X_test.iloc[sample_idx : sample_idx + 1]
+sample = X_test.iloc[sample_idx: sample_idx + 1]
 sample_scaled = scaler.transform(sample)
 
 # Random Forest SHAP
