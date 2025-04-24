@@ -75,30 +75,36 @@ sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
-# SHAP Force Plot (v0.20+ compliant)
+# SHAP Force Plot (v0.20+ Compliant)
 st.markdown("### SHAP Force Plot Explanation")
 shap.initjs()
 
+# Extract sample SHAP explanation
 sample_shap = shap_values[selected_index]
+
+# Ensure base_value is handled correctly (v0.20+ API)
 base_value = explainer.expected_value
 if isinstance(base_value, (list, np.ndarray)):
     base_value = base_value[0]
 
-sample_shap = shap.Explanation(
-    values=shap_values.values[selected_index],
-    base_values=shap_values.base_values[selected_index],
+# Build the SHAP Explanation object explicitly (not always necessary, but safe)
+explanation = shap.Explanation(
+    values=sample_shap.values,
+    base_values=sample_shap.base_values,
     data=sample.values[0],
     feature_names=sample.columns.tolist()
 )
 
-force_plot = shap.force_plot(
-    sample_shap.base_values,
-    sample_shap.values,
-    sample_shap.data,
-    feature_names=sample_shap.feature_names,
+# Generate the force plot with updated signature
+force_plot = shap.plots.force(
+    explanation.base_values,
+    explanation.values,
+    explanation.data,
+    feature_names=explanation.feature_names,
     matplotlib=False,
 )
 
+# Embed the SHAP HTML in Streamlit
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
 
