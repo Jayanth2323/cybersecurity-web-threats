@@ -149,25 +149,24 @@ with st.sidebar:
 # Sidebar - dynamic field filters
 selected_values = {}
 
-if 'dest_ip_country_code' in df.columns:
+if "dest_ip_country_code" in df.columns:
     fields = ["protocol", "dest_ip_country_code"]
     some_options = {
-        field: df[field].dropna().unique().tolist()
-        for field in fields
+        field: df[field].dropna().unique().tolist() for field in fields
     }
 
     print(df.columns)
 
-    selected_values = {}
     fields = ["protocol", "dest_ip_country_code"]
-    for i, field in enumerate(fields):
-        selected_values[field] = st.sidebar.multiselect(
+    selected_values = {
+        field: st.sidebar.multiselect(
             f"Select {field} Options",
             options=some_options[field],
             default=some_options[field],
             key=f"multiselect_{field}_{i}",
         )
-
+        for i, field in enumerate(fields)
+    }
 # Filtering
 filtered_df = df[
     df["anomaly"].isin(status)
