@@ -1,17 +1,12 @@
-# Sidebar - dynamic field filters
-selected_values = {}
+# SHAP Force Plot (Corrected)
+st.markdown("### 🔬 SHAP Force Plot Explanation")
+shap.initjs()
 
-if 'dest_ip_country_code' in df.columns:
-    fields = ["protocol", "dest_ip_country_code"]
-    some_options = {
-        field: df[field].dropna().unique().tolist()
-        for field in fields
-    }
+# Corrected call to force plot
+force_plot = shap.plots.force(
+    explainer.expected_value, shap_values[selected_index].values
+)
 
-    for i, field in enumerate(fields):
-        selected_values[field] = st.sidebar.multiselect(
-            f"Select {field} Options",
-            options=some_options[field],
-            default=some_options[field],
-            key=f"multiselect_{field}_{i}",
-        )
+# Use the components library to display the force plot
+shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+components.html(shap_html, height=300)

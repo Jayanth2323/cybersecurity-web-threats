@@ -77,7 +77,7 @@ st.markdown(f"**Prediction for this row:** `{label}`")
 st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
 
-# Correct call to force plot
+# Corrected call to force plot
 force_plot = shap.plots.force(
     explainer.expected_value, shap_values[selected_index].values
 )
