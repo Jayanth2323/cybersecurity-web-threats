@@ -68,7 +68,8 @@ selected_index = st.number_input(
 )
 
 # Display Prediction
-sample_pred = model.predict([X_test.iloc[selected_index]])[0]
+sample = X_test.iloc[[selected_index]]  # Keep as 2D
+sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
@@ -76,10 +77,11 @@ st.markdown(f"**Prediction for this row:** `{label}`")
 st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
 html = shap.plots.force(
-    explainer.expected_value[1],
-    shap_values[selected_index].values,
-    X_test.iloc[selected_index],
-    matplotlib=False,
-).html()
+    base_value=explainer.expected_value[1],
+    shap_values=shap_values[selected_index].values,
+    features=sample.values[
+        0
+    ],  # now this is safely 1D after selecting 2D above
+    matplotlib=False,).html()
 
 components.html(html, height=300)
