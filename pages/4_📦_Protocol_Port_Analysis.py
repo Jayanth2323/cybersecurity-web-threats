@@ -14,7 +14,7 @@ def load_data():
 
 df = load_data()
 
-st.subheader("\ud83d\udd22 Protocol vs Anomaly")
+st.subheader("📦 Protocol vs Anomaly")
 if "protocol" in df.columns:
     fig1, ax1 = plt.subplots(figsize=(10, 4))
     sns.countplot(data=df, x="protocol", hue="anomaly", ax=ax1)
