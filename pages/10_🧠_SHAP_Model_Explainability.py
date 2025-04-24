@@ -3,7 +3,8 @@ import pandas as pd
 import shap
 import numpy as np
 import plotly.express as px
-import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
+# import streamlit.components.v1 as components
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -96,17 +97,21 @@ explanation = shap.Explanation(
 )
 
 # Generate the force plot with updated signature
-force_plot = shap.plots.force(
-    explanation.base_values,
-    explanation.values,
-    explanation.data,
-    feature_names=explanation.feature_names,
-    matplotlib=False,
-)
 
-# Embed the SHAP HTML in Streamlit
-shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
-components.html(shap_html, height=300)
+
+st.markdown("### SHAP Force Plot Explanation (Static Image)")
+fig, ax = plt.subplots(figsize=(10, 1))
+shap.plots.force(
+    base_value=explanation.base_values,
+    shap_values=explanation.values,
+    features=explanation.data,
+    feature_names=explanation.feature_names,
+    matplotlib=True,
+    show=False
+)
+plt.tight_layout()
+st.pyplot(fig)
+
 
 # try:
 #     components.html(shap_html, height=300)
