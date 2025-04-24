@@ -93,12 +93,11 @@ def show_metrics(title, y_true, y_pred, y_prob):
 def explain_model(model, X, model_type="rf"):
     if model_type == "rf":
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X)
-        return shap_values[1]  # For binary classification, use positive class
     else:
         explainer = shap.KernelExplainer(model.predict_proba, X)
-        shap_values = explainer.shap_values(X)
-        return shap_values[1]  # For binary classification
+
+    shap_values = explainer.shap_values(X)
+    return shap_values[1]  # For binary classification, use positive class
 
 
 # Main comparison
@@ -113,7 +112,7 @@ st.header("🔍 Model Explainability with SHAP")
 
 # Sample selection
 sample_idx = st.slider("Select sample to explain", 0, len(X_test) - 1, 0)
-sample = X_test.iloc[sample_idx: sample_idx + 1]
+sample = X_test.iloc[sample_idx : sample_idx + 1]
 sample_scaled = scaler.transform(sample)
 
 # Random Forest SHAP
