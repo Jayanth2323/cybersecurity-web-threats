@@ -44,7 +44,7 @@ if len(numeric_cols) >= 2:
         linewidths=0.5,
         linecolor="white",
         square=True,
-        cbar_kws={"shrink": 0.75}
+        cbar_kws={"shrink": 0.75},
     )
     plt.xticks(rotation=45, ha="right")
     plt.yticks(rotation=0)
@@ -54,4 +54,5 @@ if len(numeric_cols) >= 2:
 else:
     st.warning(
         """There are not enough numeric columns in the dataset for
-        correlation analysis.""")
+        correlation analysis."""
+    )

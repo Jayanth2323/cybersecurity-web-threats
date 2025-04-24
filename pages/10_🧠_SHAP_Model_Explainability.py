@@ -12,15 +12,20 @@ from sklearn.metrics import (
 )
 
 st.set_page_config(page_title="SHAP Explainability", layout="wide")
-st.title("🔍 SHAP Explainability: Why This Was Flagged")
+st.title(" SHAP Explainability: Why This Was Flagged")
 
 
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/analyzed_output.csv")
     df = df.dropna(
-        subset=["anomaly", "bytes_in", "bytes_out", "duration_seconds",
-                "avg_packet_size"]
+        subset=[
+            "anomaly",
+            "bytes_in",
+            "bytes_out",
+            "duration_seconds",
+            "avg_packet_size",
+        ]
     )
     le = LabelEncoder()
     df["anomaly_binary"] = le.fit_transform(df["anomaly"])
@@ -34,13 +39,14 @@ y = df["anomaly_binary"]
 
 # Train Random Forest
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42)
+    X, y, test_size=0.3, random_state=42
+)
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
 # Model Evaluation
 y_pred = model.predict(X_test)
-st.write("### 📊 Model Evaluation:")
+st.write("### Model Evaluation:")
 st.write("**Accuracy:**", accuracy_score(y_test, y_pred))
 st.text("Classification Report:")
 st.text(classification_report(y_test, y_pred))
@@ -52,7 +58,7 @@ explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
 
 # Row selector
-st.markdown("### 🧪 Select a Sample for Explanation")
+st.markdown("### Select a Sample for Explanation")
 selected_index = st.number_input(
     f"Select Row Index (0 - {len(X_test) - 1})",
     min_value=0,
@@ -68,7 +74,7 @@ label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
 # SHAP Force Plot (v0.20+ compliant)
-st.markdown("### 🔬 SHAP Force Plot Explanation")
+st.markdown("### SHAP Force Plot Explanation")
 shap.initjs()
 
 # Use base value and single row SHAP values for the force plot
@@ -77,9 +83,29 @@ force_plot = shap.force_plot(
     shap_values[selected_index],
     sample,
     feature_names=sample.columns,
-    matplotlib=False
+    matplotlib=False,
 )
 
 # Render SHAP force plot as HTML
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
+
+
+# Add a download button for the SHAP values
+@st.cache_data
+def get_shap_values():
+    return shap_values
+
+
+shap_values_df = get_shap_values()
+csv = shap_values_df.to_csv(index=False)
+st.download_button(
+    label="Download SHAP values as CSV",
+    data=csv,
+    file_name="shap_values.csv",
+    mime="text/csv",
+)
+
+# Add a button to display the SHAP values as a table
+if st.button("Display SHAP values"):
+    st.write(shap_values_df)
