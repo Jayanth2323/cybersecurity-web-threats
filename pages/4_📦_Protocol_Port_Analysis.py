@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-st.title("\ud83d\udce6 Protocol & Port Analysis")
+st.title("📦 Protocol & Port Analysis")
 
 
 @st.cache_data
