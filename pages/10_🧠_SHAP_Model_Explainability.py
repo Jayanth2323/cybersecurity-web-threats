@@ -4,7 +4,6 @@ import shap
 import numpy as np
 import plotly.express as px
 import matplotlib.pyplot as plt
-# import streamlit.components.v1 as components
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -18,6 +17,7 @@ st.set_page_config(page_title="SHAP Explainability", layout="wide")
 st.title("🧠 SHAP Explainability: Why This Was Flagged")
 
 
+# Load & clean data
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/analyzed_output.csv")
@@ -40,89 +40,69 @@ features = ["bytes_in", "bytes_out", "duration_seconds", "avg_packet_size"]
 X = df[features]
 y = df["anomaly_binary"]
 
-# Train Random Forest
+# Train model
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42
 )
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-# Model Evaluation
+# Evaluation
 y_pred = model.predict(X_test)
-st.write("### Model Evaluation:")
-st.write("**Accuracy:**", accuracy_score(y_test, y_pred))
+st.markdown("### 📊 Model Evaluation")
+st.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.2f}")
 st.text("Classification Report:")
 st.text(classification_report(y_test, y_pred))
 st.text("Confusion Matrix:")
 st.write(confusion_matrix(y_test, y_pred))
 
-# SHAP Explainer
+# SHAP
 explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
 
-# Row selector
-st.markdown("### Select a Sample for Explanation")
+# Sample selection
+st.markdown("### 🔎 Select a Sample for Explanation")
 selected_index = st.number_input(
-    f"Select Row Index (0 - {len(X_test) - 1})",
+    f"Row Index (0 - {len(X_test) - 1})",
     min_value=0,
     max_value=len(X_test) - 1,
     step=1,
-    key="row_index",
 )
-
-# Display Prediction
 sample = X_test.iloc[[selected_index]]
 sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
-st.markdown(f"**Prediction for this row:** `{label}`")
+st.markdown(f"**Prediction for selected row:** `{label}`")
 
-# SHAP Force Plot (v0.20+ Compliant)
-st.markdown("### SHAP Force Plot Explanation")
-shap.initjs()
-
-# Extract sample SHAP explanation
+# SHAP Explanation (Safe Static Plot)
+st.markdown("### 📉 SHAP Force Plot (Static)")
 sample_shap = shap_values[selected_index]
-
-# Ensure base_value is handled correctly (v0.20+ API)
-base_value = explainer.expected_value
-if isinstance(base_value, (list, np.ndarray)):
-    base_value = base_value[0]
-
-# Build the SHAP Explanation object explicitly (not always necessary, but safe)
-explanation = shap.Explanation(
-    values=sample_shap.values,
-    base_values=sample_shap.base_values,
-    data=sample.values[0],
-    feature_names=sample.columns.tolist()
+base_value = (
+    explainer.expected_value[0]
+    if isinstance(explainer.expected_value, (list, np.ndarray))
+    else explainer.expected_value
 )
 
-# Generate the force plot with updated signature
+explanation = shap.Explanation(
+    values=sample_shap.values,
+    base_values=base_value,
+    data=sample.values[0],
+    feature_names=sample.columns.tolist(),
+)
 
-
-st.markdown("### SHAP Force Plot Explanation (Static Image)")
 fig, ax = plt.subplots(figsize=(10, 1))
 shap.plots.force(
-    base_value=explanation.base_values,
+    base_value=explanation.base_values,  # Corrected order of arguments
     shap_values=explanation.values,
     features=explanation.data,
     feature_names=explanation.feature_names,
     matplotlib=True,
-    show=False
+    show=False,
 )
 plt.tight_layout()
 st.pyplot(fig)
 
-
-# try:
-#     components.html(shap_html, height=300)
-# except Exception as e:
-#     st.error(f"Error rendering SHAP force plot: {e}")
-
-
-# Top contributing features (Bar Chart)
-with st.expander(
-    "📊 View Top Contributing Features (Bar Chart)", expanded=False
-):
+# Top Features Chart
+with st.expander("📊 Top Contributing Features", expanded=False):
     shap_row = shap_values[selected_index].values
     abs_shap_values = np.abs(shap_row)
     feature_importance = pd.DataFrame(
@@ -133,18 +113,18 @@ with st.expander(
         }
     ).sort_values(by="Absolute SHAP", ascending=False)
 
-    fig = px.bar(
+    fig_bar = px.bar(
         feature_importance,
         x="SHAP Value",
         y="Feature",
         orientation="h",
-        title="Top Contributing Features (Single Sample)",
+        title="Top Contributing Features",
         color="SHAP Value",
         color_continuous_scale="RdBu",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
 
-# SHAP Summary Plot (Interactive Plotly)
+# Summary Plot
 with st.expander("📈 SHAP Summary Plot (All Samples)"):
     summary_df = pd.DataFrame(shap_values.values, columns=X_test.columns)
     summary_df["Predicted"] = model.predict(X_test)
@@ -157,7 +137,7 @@ with st.expander("📈 SHAP Summary Plot (All Samples)"):
         x="SHAP Value",
         y="Feature",
         color="Predicted",
-        title="SHAP Summary Plot (Interactive)",
+        title="SHAP Summary (All Samples)",
         orientation="h",
         stripmode="overlay",
     )
@@ -173,12 +153,12 @@ def get_shap_values_df():
 shap_values_df = get_shap_values_df()
 csv = shap_values_df.to_csv(index=False)
 st.download_button(
-    label="📥 Download SHAP values as CSV",
+    label="📥 Download SHAP Values (CSV)",
     data=csv,
     file_name="shap_values.csv",
     mime="text/csv",
 )
 
-# Display SHAP Table
-if st.button("🧾 Display All SHAP Values (Table View)"):
+# Optional full table
+if st.button("🧾 Show All SHAP Values Table"):
     st.write(shap_values_df)
