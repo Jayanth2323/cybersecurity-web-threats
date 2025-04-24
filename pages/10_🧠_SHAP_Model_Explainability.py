@@ -78,12 +78,11 @@ st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
 
 # Safely handle indexing and plotting
-shap_html = shap.plots.force(
+force_plot = shap.plots.force(
     explainer.expected_value,
     shap_values[selected_index].values,
-    sample.values[0],
-    matplotlib=False,
-    show=False,
-).html()
+    sample.values[0]
+)
 
+shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
