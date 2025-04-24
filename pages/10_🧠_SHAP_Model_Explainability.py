@@ -19,13 +19,8 @@ st.title("🔍 SHAP Explainability: Why This Was Flagged")
 def load_data():
     df = pd.read_csv("data/analyzed_output.csv")
     df = df.dropna(
-        subset=[
-            "anomaly",
-            "bytes_in",
-            "bytes_out",
-            "duration_seconds",
-            "avg_packet_size",
-        ]
+        subset=["anomaly", "bytes_in", "bytes_out", "duration_seconds",
+                "avg_packet_size"]
     )
     le = LabelEncoder()
     df["anomaly_binary"] = le.fit_transform(df["anomaly"])
@@ -39,8 +34,7 @@ y = df["anomaly_binary"]
 
 # Train Random Forest
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
-)
+    X, y, test_size=0.3, random_state=42)
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
@@ -73,15 +67,19 @@ sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
-# SHAP Force Plot (Corrected)
+# SHAP Force Plot (v0.20+ compliant)
 st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
 
-# Corrected call to force plot
-force_plot = shap.plots.force(
-    explainer.expected_value, shap_values[selected_index].values
+# Use base value and single row SHAP values for the force plot
+force_plot = shap.force_plot(
+    base_value=explainer.expected_value,
+    shap_values=shap_values[selected_index].values,
+    features=sample.values,
+    feature_names=sample.columns,
+    matplotlib=False
 )
 
-# Use the components library to display the force plot
+# Render SHAP force plot as HTML
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
