@@ -53,7 +53,7 @@ st.text(classification_report(y_test, y_pred))
 st.text("Confusion Matrix:")
 st.write(confusion_matrix(y_test, y_pred))
 
-# SHAP explainer
+# SHAP Explainer
 explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
 
@@ -73,15 +73,17 @@ sample_pred = model.predict(sample)[0]
 label = "Suspicious" if sample_pred == 1 else "Normal"
 st.markdown(f"**Prediction for this row:** `{label}`")
 
-# SHAP Force Plot
+# SHAP Force Plot (Corrected)
 st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
-html = shap.plots.force(
-    base_value=explainer.expected_value[1],
-    shap_values=shap_values[selected_index].values,
-    features=sample.values[
-        0
-    ],  # now this is safely 1D after selecting 2D above
-    matplotlib=False,).html()
 
-components.html(html, height=300)
+# Safely handle indexing and plotting
+shap_html = shap.plots.force(
+    explainer.expected_value,
+    shap_values[selected_index].values,
+    sample.values[0],
+    matplotlib=False,
+    show=False,
+).html()
+
+components.html(shap_html, height=300)
