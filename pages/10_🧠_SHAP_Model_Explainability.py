@@ -73,9 +73,9 @@ shap.initjs()
 
 # Use base value and single row SHAP values for the force plot
 force_plot = shap.force_plot(
-    base_value=explainer.expected_value,
-    shap_values=shap_values[selected_index].values,
-    features=sample.values,
+    explainer.expected_value,
+    shap_values[selected_index],
+    sample,
     feature_names=sample.columns,
     matplotlib=False
 )
