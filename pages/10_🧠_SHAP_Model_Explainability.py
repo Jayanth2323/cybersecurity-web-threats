@@ -77,12 +77,11 @@ st.markdown(f"**Prediction for this row:** `{label}`")
 st.markdown("### 🔬 SHAP Force Plot Explanation")
 shap.initjs()
 
-# Safely handle indexing and plotting
+# Correct call to force plot
 force_plot = shap.plots.force(
-    explainer.expected_value,
-    shap_values[selected_index].values,
-    sample.values[0]
+    explainer.expected_value, shap_values[selected_index].values
 )
 
+# Use the components library to display the force plot
 shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 components.html(shap_html, height=300)
