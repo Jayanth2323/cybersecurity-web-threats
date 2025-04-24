@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import shap
+
+# import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import (
@@ -89,15 +91,21 @@ def show_metrics(title, y_true, y_pred, y_prob):
     st.pyplot(fig)
 
 
-# SHAP explainability function
-def explain_model(model, X, model_type="rf"):
-    if model_type == "rf":
-        explainer = shap.TreeExplainer(model)
-    else:
-        explainer = shap.KernelExplainer(model.predict_proba, X)
-
-    shap_values = explainer.shap_values(X)
-    return shap_values[1]  # For binary classification, use positive class
+# SHAP explainability function with dimension checks
+def explain_model(model, X, X_train, model_type="rf"):
+    try:
+        if model_type == "rf":
+            explainer = shap.TreeExplainer(model)
+        else:
+            # For NN, use KernelExplainer with background
+            background = shap.kmeans(X_train, 10)
+            explainer = shap.KernelExplainer(model.predict_proba, background)
+        shap_values = explainer.shap_values(X)
+        # For binary classification, return positive class values
+        return shap_values[1] if isinstance(shap_values, list) else shap_values
+    except Exception as e:
+        st.error(f"SHAP explanation error: {str(e)}")
+        return None
 
 
 # Main comparison
@@ -118,61 +126,74 @@ sample_scaled = scaler.transform(sample)
 # Random Forest SHAP
 st.subheader("🌳 Random Forest Explanation")
 try:
-    rf_shap_values = explain_model(rf, X_train, "rf")
+    rf_shap_values = explain_model(rf, X_test, X_train, "rf")
 
-    # Force plot
-    st.markdown("#### Force Plot")
-    plt.figure()
-    shap.force_plot(
-        rf.predict_proba(X_train)[:, 1].mean(),
-        rf_shap_values[sample_idx],
-        sample.values[0],
-        feature_names=features,
-        matplotlib=True,
-        show=False,
-    )
-    st.pyplot(plt.gcf(), bbox_inches="tight")
-    plt.clf()
+    if rf_shap_values is not None:
+        # Verify dimensions
+        st.write(f"SHAP values shape: {rf_shap_values.shape}")
+        st.write(f"Sample shape: {sample.shape}")
 
-    # Summary plot
-    st.markdown("#### Feature Importance")
-    plt.figure()
-    shap.summary_plot(
-        rf_shap_values, X_test, feature_names=features, show=False
-    )
-    st.pyplot(plt.gcf(), bbox_inches="tight")
-    plt.clf()
+        # Force plot with correct dimensions
+        plt.figure()
+        shap.force_plot(
+            rf.predict_proba(X_train)[:, 1].mean(),
+            rf_shap_values[sample_idx, :],  # Correct slicing for single sample
+            sample.values[0],  # Feature values as 1D array
+            feature_names=features,
+            matplotlib=True,
+            show=False,
+        )
+        st.pyplot(plt.gcf(), bbox_inches="tight")
+        plt.clf()
+
+        # Summary plot
+        st.markdown("#### Feature Importance")
+        plt.figure()
+        shap.summary_plot(
+            rf_shap_values,
+            X_test.values,  # Ensure numpy array
+            feature_names=features,
+            show=False,
+        )
+        st.pyplot(plt.gcf(), bbox_inches="tight")
+        plt.clf()
 except Exception as e:
     st.error(f"Error explaining Random Forest: {str(e)}")
 
 # Neural Network SHAP
 st.subheader("🧠 Neural Network Explanation")
 try:
-    # Using Kernel SHAP for NN
-    nn_shap_values = explain_model(nn, X_train_scaled, "nn")
+    nn_shap_values = explain_model(nn, X_test_scaled, X_train_scaled, "nn")
 
-    # Force plot
-    st.markdown("#### Force Plot")
-    plt.figure()
-    shap.force_plot(
-        nn.predict_proba(X_train_scaled)[:, 1].mean(),
-        nn_shap_values[sample_idx],
-        sample_scaled[0],
-        feature_names=features,
-        matplotlib=True,
-        show=False,
-    )
-    st.pyplot(plt.gcf(), bbox_inches="tight")
-    plt.clf()
+    if nn_shap_values is not None:
+        # Verify dimensions
+        st.write(f"SHAP values shape: {nn_shap_values.shape}")
+        st.write(f"Sample shape: {sample_scaled.shape}")
 
-    # Summary plot
-    st.markdown("#### Feature Importance")
-    plt.figure()
-    shap.summary_plot(
-        nn_shap_values, X_test_scaled, feature_names=features, show=False
-    )
-    st.pyplot(plt.gcf(), bbox_inches="tight")
-    plt.clf()
+        # Force plot with correct dimensions
+        plt.figure()
+        shap.force_plot(
+            nn.predict_proba(X_train_scaled)[:, 1].mean(),
+            nn_shap_values[sample_idx, :],  # Correct slicing for single sample
+            sample_scaled[0],  # Feature values as 1D array
+            feature_names=features,
+            matplotlib=True,
+            show=False,
+        )
+        st.pyplot(plt.gcf(), bbox_inches="tight")
+        plt.clf()
+
+        # Summary plot
+        st.markdown("#### Feature Importance")
+        plt.figure()
+        shap.summary_plot(
+            nn_shap_values,
+            X_test_scaled,  # Already numpy array
+            feature_names=features,
+            show=False,
+        )
+        st.pyplot(plt.gcf(), bbox_inches="tight")
+        plt.clf()
 except Exception as e:
     st.error(f"Error explaining Neural Network: {str(e)}")
 
