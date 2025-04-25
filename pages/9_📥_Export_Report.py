@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
-import pdfkit
 import datetime
+from xhtml2pdf import pisa
+from io import BytesIO
 
-# import os
-
-st.set_page_config(page_title=" Export PDF Report", layout="wide")
+st.set_page_config(page_title="📥 Export PDF Report", layout="wide")
 st.title("Generate & Download PDF Threat Report")
 
 
@@ -60,23 +59,23 @@ html = f"""
 </html>
 """
 
-# PDF Export
+# PDF Export with xhtml2pdf
 if st.button("Generate PDF"):
     try:
-        path_pdf = f"""{report_title}_{
-            datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-            }.pdf"""
-        pdfkit.from_string(html, path_pdf, options={"quiet": ""})
-        with open(path_pdf, "rb") as f:
+        pdf_output = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=pdf_output)
+        if not pisa_status.err:
             st.download_button(
                 label="Download PDF",
-                data=f,
-                file_name=path_pdf,
+                data=pdf_output.getvalue(),
+                file_name=f"""
+                {report_title}_{
+                    datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf""",
                 mime="application/pdf",
             )
             st.success("PDF generated successfully!")
+        else:
+            st.error("PDF generation failed.")
     except Exception as e:
-        st.error("PDF generation failed. Is wkhtmltopdf installed?")
-        st.text(str(e))
-        st.text("Error Details:")
+        st.error("Unexpected error during PDF generation.")
         st.code(str(e))
