@@ -27,7 +27,7 @@ filtered_df = df[df["anomaly"].isin(selected_status)].copy()
 # Metadata
 st.markdown("### 📝 Report Metadata")
 report_title = st.text_input("Report Title", "Cybersecurity Threat Summary")
-analyst_name = st.text_input("Prepared By", "John Doe")
+analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
 report_date = st.date_input("Report Date", datetime.date.today())
 
 # Preview Data
