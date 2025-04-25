@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import warnings
+
+warnings.filterwarnings("ignore")
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import (
@@ -14,28 +17,40 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, Dropout
+# from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras.callbacks import EarlyStopping
+
 st.set_page_config(page_title="Model Comparison", layout="wide")
 st.title("⚖️ Compare Random Forest vs Neural Network")
 
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/analyzed_output.csv")
-    df = df.dropna(
-        subset=[
-            "anomaly",
-            "bytes_in",
-            "bytes_out",
-            "duration_seconds",
-            "avg_packet_size",
-        ]
-    )
-    le = LabelEncoder()
-    df["anomaly_binary"] = le.fit_transform(df["anomaly"])
-    return df
+    try:
+        df = pd.read_csv("data/analyzed_output.csv")
+        df = df.dropna(
+            subset=[
+                "anomaly",
+                "bytes_in",
+                "bytes_out",
+                "duration_seconds",
+                "avg_packet_size",
+            ]
+        )
+        le = LabelEncoder()
+        df["anomaly_binary"] = le.fit_transform(df["anomaly"])
+        return df
+    except Exception as e:
+        st.error(f"Data loading error: {str(e)}")
+        return None
 
 
 df = load_data()
+if df is None:
+    st.stop()
+
 features = ["bytes_in", "bytes_out", "duration_seconds", "avg_packet_size"]
 X = df[features]
 y = df["anomaly_binary"]

@@ -4,6 +4,7 @@ import shap
 import numpy as np
 import plotly.express as px
 import matplotlib.pyplot as plt
+import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -34,9 +35,8 @@ def load_data():
         le = LabelEncoder()
         df["anomaly_binary"] = le.fit_transform(df["anomaly"])
         return df
-    except FileNotFoundError:
-        st.error("Error: File 'data/analyzed_output.csv' not found.")
-        return None
+    except Exception as e:
+        st.error(f"Data loading error: {str(e)}")
 
 
 df = load_data()
@@ -169,3 +169,4 @@ try:
         st.write(shap_df)
 except Exception as e:
     st.error(f"SHAP table error: {str(e)}")
+warnings.filterwarnings("ignore")
