@@ -59,7 +59,9 @@ html = f"""
 # PDF Export
 if st.button("📄 Generate PDF"):
     try:
-        path_pdf = "threat_report.pdf"
+        path_pdf = f"""{
+            report_title}_{
+                datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"""
         pdfkit.from_string(html, path_pdf)
         with open(path_pdf, "rb") as f:
             st.download_button(
@@ -71,3 +73,5 @@ if st.button("📄 Generate PDF"):
     except Exception as e:
         st.error("❌ PDF generation failed. Is wkhtmltopdf installed?")
         st.text(str(e))
+        st.text("Error Details:")
+        st.code(str(e))
