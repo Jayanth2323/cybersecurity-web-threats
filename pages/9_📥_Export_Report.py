@@ -171,20 +171,20 @@ def style_excel(df):
     return output
 
 
-# CSV Export
+# # CSV Export
 
 
-if st.button("Generate CSV"):
-    try:
-        csv_output = filtered_df.to_csv(index=False)
-        st.download_button(
-            label="Download CSV",
-            data=csv_output,
-            file_name=f"""{report_title.replace(' ', '_')}_{
-                datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.csv""",
-            mime="text/csv",
-        )
-        st.success(" CSV generated and ready for download.")
-    except Exception as e:
-        st.error(" Unexpected error during CSV generation.")
-        st.code(str(e))
+# if st.button("Generate CSV"):
+#     try:
+#         csv_output = filtered_df.to_csv(index=False)
+#         st.download_button(
+#             label="Download CSV",
+#             data=csv_output,
+#             file_name=f"""{report_title.replace(' ', '_')}_{
+#                 datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.csv""",
+#             mime="text/csv",
+#         )
+#         st.success(" CSV generated and ready for download.")
+#     except Exception as e:
+#         st.error(" Unexpected error during CSV generation.")
+#         st.code(str(e))
