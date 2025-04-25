@@ -118,7 +118,8 @@ if st.button("Generate PDF"):
             st.success("✅ PDF generated and ready for download.")
         else:
             st.error(
-                "❌ PDF generation failed. Please verify HTML/CSS compatibility."
+                """❌ PDF generation failed.
+                Please verify HTML/CSS compatibility."""
             )
     except Exception as e:
         st.error("⚠️ Unexpected error during PDF generation.")
