@@ -94,23 +94,23 @@ if st.button("Generate CSV"):
         st.code(str(e))
 
 # Excel Export
-if st.button("Generate Excel"):
-    try:
-        # Save filtered data to Excel with styles
-        excel_output = style_excel(filtered_df)
-        st.download_button(
-            label="Download Excel",
-            data=excel_output,
-            file_name=f"""
-            {report_title.replace(' ', '_')}_{
-                datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx""",
-            mime="""application
-            /vnd.openxmlformats-officedocument.spreadsheetml.sheet""",
-        )
-        st.success("✅ Excel generated and ready for download.")
-    except Exception as e:
-        st.error("⚠️ Unexpected error during Excel generation.")
-        st.code(str(e))
+# if st.button("Generate Excel"):
+#     try:
+#         # Save filtered data to Excel with styles
+#         excel_output = style_excel(filtered_df)
+#         st.download_button(
+#             label="Download Excel",
+#             data=excel_output,
+#             file_name=f"""
+#             {report_title.replace(' ', '_')}_{
+#                 datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx""",
+#             mime="""application
+#             /vnd.openxmlformats-officedocument.spreadsheetml.sheet""",
+#         )
+#         st.success("✅ Excel generated and ready for download.")
+#     except Exception as e:
+#         st.error("⚠️ Unexpected error during Excel generation.")
+#         st.code(str(e))
 
 # PDF Export
 # st.set_page_config(page_title=" Export CSV/Excel Report", layout="wide")
@@ -153,22 +153,22 @@ st.dataframe(filtered_df, use_container_width=True)
 # Function to style the Excel export with conditional formatting
 
 
-def style_excel(df):
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine="xlsxwriter")
-    df.to_excel(writer, index=False, sheet_name="Threat Report")
-    workbook = writer.book
-    worksheet = writer.sheets["Threat Report"]
-    suspicious_format = workbook.add_format({"bg_color": "#FFCCCC"})
-    normal_format = workbook.add_format({"bg_color": "#E6FFE6"})
-    for row_num, row in df.iterrows():
-        if str(row["anomaly"]).lower() == "suspicious":
-            worksheet.set_row(row_num + 1, None, suspicious_format)
-        else:
-            worksheet.set_row(row_num + 1, None, normal_format)
-    writer.save()
-    output.seek(0)
-    return output
+# def style_excel(df):
+#     output = BytesIO()
+#     writer = pd.ExcelWriter(output, engine="xlsxwriter")
+#     df.to_excel(writer, index=False, sheet_name="Threat Report")
+#     workbook = writer.book
+#     worksheet = writer.sheets["Threat Report"]
+#     suspicious_format = workbook.add_format({"bg_color": "#FFCCCC"})
+#     normal_format = workbook.add_format({"bg_color": "#E6FFE6"})
+#     for row_num, row in df.iterrows():
+#         if str(row["anomaly"]).lower() == "suspicious":
+#             worksheet.set_row(row_num + 1, None, suspicious_format)
+#         else:
+#             worksheet.set_row(row_num + 1, None, normal_format)
+#     writer.save()
+#     output.seek(0)
+#     return output
 
 
 # # CSV Export
