@@ -42,6 +42,38 @@ html = f"""
 <html>
 <head>
     <style>
+        body {{
+            font-family: 'Helvetica', sans-serif;
+            padding: 30px;
+            font-size: 12px;
+        }}
+        h1 {{
+            color: #2E86C1;
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        .meta {{
+            margin-bottom: 20px;
+            font-size: 11pt;
+        }}
+        .meta strong {{
+            color: #333;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }}
+        th, td {{
+            border: 1px solid #bbb;
+            padding: 5px;
+            text-align: left;
+            vertical-align: top;
+        }}
+        th {{
+            background-color: #f0f0f0;
+        }}
+
         h1 {{ color: #ff4b4b; }}
         table {{ width: 100%; border-collapse: collapse; }}
         th, td {{ border: 1px solid #ccc; padding: 6px; font-size: 10pt; }}
@@ -51,6 +83,13 @@ html = f"""
 </head>
 <body>
     <h1>{report_title}</h1>
+    <div class="meta">
+        <p><strong>Analyst:</strong> {analyst_name}</p>
+        <p><strong>Date:</strong> {report_date}</p>
+        <p><strong>Total Records:</strong> {len(filtered_df)}</p>
+    </div>
+    {filtered_df.to_html(index=False, border=0)}
+
     <p><strong>Analyst:</strong> {analyst_name}<br>
     <strong>Date:</strong> {report_date}</p>
     <p><strong>Total Records:</strong> {len(filtered_df)}</p>
@@ -75,7 +114,9 @@ if st.button("Generate PDF"):
             )
             st.success("PDF generated successfully!")
         else:
-            st.error("PDF generation failed.")
+            st.error("""PDF generation failed.
+                    Please check your data or formatting.""")
+
     except Exception as e:
         st.error("Unexpected error during PDF generation.")
         st.code(str(e))
