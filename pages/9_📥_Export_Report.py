@@ -5,19 +5,23 @@ import datetime
 
 # import os
 
-st.set_page_config(page_title="📥 Export PDF Report", layout="wide")
-st.title("📄 Generate & Download PDF Threat Report")
+st.set_page_config(page_title=" Export PDF Report", layout="wide")
+st.title("Generate & Download PDF Threat Report")
 
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/analyzed_output.csv")
+    try:
+        return pd.read_csv("data/analyzed_output.csv")
+    except Exception as e:
+        st.error("Error loading data")
+        st.text(str(e))
 
 
 df = load_data()
 
 # Filter Options
-st.markdown("### 🔍 Filter Options")
+st.markdown("### Filter Options")
 status_options = df["anomaly"].dropna().unique().tolist()
 selected_status = st.multiselect(
     "Filter by Anomaly", status_options, default=status_options
@@ -25,13 +29,13 @@ selected_status = st.multiselect(
 filtered_df = df[df["anomaly"].isin(selected_status)].copy()
 
 # Metadata
-st.markdown("### 📝 Report Metadata")
+st.markdown("### Report Metadata")
 report_title = st.text_input("Report Title", "Cybersecurity Threat Summary")
 analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
 report_date = st.date_input("Report Date", datetime.date.today())
 
 # Preview Data
-st.markdown("### 🧾 Preview of Filtered Data")
+st.markdown("### Preview of Filtered Data")
 st.dataframe(filtered_df, use_container_width=True)
 
 # Build HTML
@@ -57,7 +61,7 @@ html = f"""
 """
 
 # PDF Export
-if st.button("📄 Generate PDF"):
+if st.button("Generate PDF"):
     try:
         path_pdf = f"""{report_title}_{
             datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -65,14 +69,14 @@ if st.button("📄 Generate PDF"):
         pdfkit.from_string(html, path_pdf, options={"quiet": ""})
         with open(path_pdf, "rb") as f:
             st.download_button(
-                label="⬇️ Download PDF",
+                label="Download PDF",
                 data=f,
                 file_name=path_pdf,
                 mime="application/pdf",
             )
             st.success("PDF generated successfully!")
     except Exception as e:
-        st.error("❌ PDF generation failed. Is wkhtmltopdf installed?")
+        st.error("PDF generation failed. Is wkhtmltopdf installed?")
         st.text(str(e))
         st.text("Error Details:")
         st.code(str(e))
