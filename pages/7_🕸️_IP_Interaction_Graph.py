@@ -35,7 +35,9 @@ def load_data(file_path: str = DEFAULT_DATA_PATH) -> Optional[pd.DataFrame]:
         return None
 
 
-def create_interaction_graph(df: pd.DataFrame) -> plt.Figure:
+def create_interaction_graph(
+    df: pd.DataFrame,
+) -> tuple[plt.Figure, nx.DiGraph]:
     """Generate interactive IP network visualization."""
     st.markdown("### Network Traffic Flow Visualization")
 
@@ -114,7 +116,7 @@ def create_interaction_graph(df: pd.DataFrame) -> plt.Figure:
     ax.axis("off")
     plt.tight_layout()
 
-    return fig
+    return fig, G
 
 
 def show_graph_statistics(G: nx.DiGraph):
@@ -149,9 +151,13 @@ def main():
     if df is None:
         return
 
-    fig = create_interaction_graph(df)
+    fig, graph = create_interaction_graph(df)
     st.pyplot(fig)
-    show_graph_statistics(fig.graph)
+    show_graph_statistics(graph)
+
+    # fig = create_interaction_graph(df)
+    # st.pyplot(fig)
+    # show_graph_statistics(fig.graph)
 
     # Add expander with raw data preview
     with st.expander("Show raw data preview"):
