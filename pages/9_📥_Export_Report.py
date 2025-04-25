@@ -104,19 +104,21 @@ if st.button("Generate PDF"):
         pdf_output = BytesIO()
         pisa_status = pisa.CreatePDF(html, dest=pdf_output)
         if not pisa_status.err:
+            file_name = f"""
+            {report_title}_{
+                datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"""
             st.download_button(
                 label="Download PDF",
                 data=pdf_output.getvalue(),
-                file_name=f"""
-                {report_title}_{
-                    datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf""",
+                file_name=file_name,
                 mime="application/pdf",
             )
             st.success("PDF generated successfully!")
         else:
-            st.error("""PDF generation failed.
-                    Please check your data or formatting.""")
-
+            st.error(
+                """PDF generation failed.
+                    Please check your data or formatting."""
+            )
     except Exception as e:
         st.error("Unexpected error during PDF generation.")
         st.code(str(e))
