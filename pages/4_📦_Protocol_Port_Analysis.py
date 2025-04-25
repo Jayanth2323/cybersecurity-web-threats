@@ -7,9 +7,11 @@ import warnings
 
 from typing import Tuple, Optional
 
-st.title("📦 Protocol & Port Analysis")
+# st.title("📦 Protocol & Port Analysis")
 
 DEFAULT_DATA_PATH = "data/analyzed_output.csv"
+
+warnings.filterwarnings("ignore")
 
 
 @st.cache_data
