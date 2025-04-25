@@ -113,38 +113,38 @@ if st.button("Generate Excel"):
         st.code(str(e))
 
 # PDF Export
-st.set_page_config(page_title=" Export CSV/Excel Report", layout="wide")
-st.title("Generate & Download CSV/Excel Threat Report")
+# st.set_page_config(page_title=" Export CSV/Excel Report", layout="wide")
+# st.title("Generate & Download CSV/Excel Threat Report")
 
 
-@st.cache_data
-def load_data():
-    try:
-        return pd.read_csv("data/analyzed_output.csv")
-    except Exception as e:
-        st.error("Error loading data")
-        st.text(str(e))
+# @st.cache_data
+# def load_data():
+#     try:
+#         return pd.read_csv("data/analyzed_output.csv")
+#     except Exception as e:
+#         st.error("Error loading data")
+#         st.text(str(e))
 
 
-df = load_data()
+# df = load_data()
 
 # Filter Options
-st.markdown("### Filter Options")
-status_options = df["anomaly"].dropna().unique().tolist()
-selected_status = st.multiselect(
-    "Filter by Anomaly", status_options, default=status_options
-)
-filtered_df = df[df["anomaly"].isin(selected_status)].copy()
+# # # st.markdown("### Filter Options")
+# # # status_options = df["anomaly"].dropna().unique().tolist()
+# # # selected_status = st.multiselect(
+# # #     "Filter by Anomaly", status_options, default=status_options
+# # # )
+# # # filtered_df = df[df["anomaly"].isin(selected_status)].copy()
 
-# Metadata
-st.markdown("### Report Metadata")
-with st.form("report_metadata"):
-    report_title = st.text_input(
-        "Report Title", "Cybersecurity Threat Summary"
-    )
-    analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
-    report_date = st.date_input("Report Date", datetime.date.today())
-    submit_button = st.form_submit_button(label="Submit")
+# # Metadata
+# st.markdown("### Report Metadata")
+# with st.form("report_metadata"):
+#     report_title = st.text_input(
+#         "Report Title", "Cybersecurity Threat Summary"
+#     )
+#     analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
+#     report_date = st.date_input("Report Date", datetime.date.today())
+#     submit_button = st.form_submit_button(label="Submit")
 
 # Preview Data
 st.markdown("### Preview of Filtered Data")
