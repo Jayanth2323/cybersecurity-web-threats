@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 from io import BytesIO
-import xlsxwriter
+# import xlsxwriter
 
 st.set_page_config(page_title="📥 Export CSV/Excel Report", layout="wide")
 st.title("Generate & Download CSV/Excel Threat Report")
