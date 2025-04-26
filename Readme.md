@@ -1,55 +1,61 @@
-🛡️ Suspicious Web Threat Interaction Dashboard
 
-An enterprise-grade dashboard for real-time web threat detection, data filtering, ML explainability, and report generation — powered by Random Forests, Neural Networks, SHAP, and Streamlit.
+# 🛡️ Suspicious Web Threat Interaction Dashboard
 
-🎯 Key Features
-🔍 Advanced anomaly detection (RF + NN)
+An enterprise-grade, real-time dashboard for web threat detection, data filtering, ML explainability, and report generation — powered by Random Forests, Neural Networks, SHAP, and Streamlit.
 
-🌍 Geo-mapping of suspicious IP activity
+---
 
-📦 Packet size and protocol filters
+## 🎯 Key Features
+- 🔍 **Advanced Anomaly Detection** (Random Forests + Neural Networks)
+- 🌍 **Geo-Mapping** of suspicious IP activity
+- 📦 **Packet Size and Protocol Filters**
+- 📈 **Interactive SHAP Explainability Dashboard**
+- ⚖️ **Model Comparison** (Accuracy, F1 Score, ROC Curves)
+- 📥 **PDF Report Generator** with custom filters and metadata
+- 🧠 **Visual Analytics**, Correlation Heatmaps, Time-Series, and Port Analysis
+- 🔐 **Optional User Login** for Secured Dashboards
+- ✅ **CI/CD-Ready** for Streamlit Cloud Deployment with GitHub Actions
 
-📈 Interactive SHAP explainability dashboard
+---
 
-⚖️ Model comparison (Accuracy, F1, ROC)
-
-📥 PDF report generator with filters + metadata
-
-🧠 Visual analytics, correlation, time-series, and port analysis
-
-🔐 (Optional) User login for secured dashboards
-
-✅ CI/CD-ready for Streamlit Cloud and GitHub Actions
-
-🚀 Live Demo
+## 🚀 Live Demo
 [![Streamlit App](https://img.shields.io/badge/Launch%20App-Streamlit-brightgreen)](https://cybersecurity-web-threats-cdjl6zk84ozvkcvbbw8wnj.streamlit.app/)
 
-🧠 Technologies Used
-Python 3.10
+Experience the full capabilities of the dashboard live in action.
 
-Streamlit
+---
 
-pandas, scikit-learn, matplotlib, plotly, seaborn
+## 🧠 Technologies Used
+- **Python 3.10**
+- **Streamlit** for UI/UX and web deployment
+- **pandas**, **scikit-learn**, **matplotlib**, **plotly**, **seaborn** for data manipulation and visualization
+- **SHAP** for model explainability
+- **pdfkit**, **xlsxwriter** for export functionalities
+- **streamlit-authenticator** for user authentication
+- **Docker** + **GitHub CI** (optional for containerized deployment)
 
-SHAP, pdfkit, xlsxwriter, streamlit-authenticator
+---
 
-Docker + GitHub CI (optional)
+## ⚙️ Setup Instructions
 
-⚙️ Setup Instructions
-📦 Clone & Install
-bash
-Copy
-Edit
+### 📦 Clone & Install
+```bash
 git clone https://github.com/your-username/cybersecurity-web-threats.git
 cd cybersecurity-web-threats
 pip install -r requirements.txt
-▶️ Run Locally
-bash
-Copy
-Edit
-streamlit run streamlit_app.py
+```
 
-📦 cybersecurity-web-threats
+### ▶️ Run Locally
+```bash
+streamlit run streamlit_app.py
+```
+
+---
+
+## 📂 Project Structure
+
+```
+cybersecurity-web-threats/
 ├── streamlit_app.py
 ├── requirements.txt
 ├── pages/
@@ -72,12 +78,19 @@ streamlit run streamlit_app.py
 │   └── model_eval.py
 ├── data/
 │   └── analyzed_output.csv
+```
 
-👨‍💻 Author
-Jayanth Chennoju — Jayanth2323
+---
 
-Feel free to fork, improve, or contribute!
+## 👨‍💻 Author
+**Jayanth Chennoju** — [Jayanth2323](https://github.com/Jayanth2323)
 
-📄 License
-This project is licensed under the MIT License.
-See the LICENSE file for more info.
+I warmly welcome community contributions. Feel free to fork, improve, or submit a pull request!
+
+---
+
+## 📄 License
+This project is licensed under the **MIT License**.  
+Please refer to the [LICENSE](LICENSE) file for detailed information.
+
+---
