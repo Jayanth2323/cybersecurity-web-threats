@@ -204,7 +204,7 @@ if not country_counts.empty:
         locations="src_ip_country_code",
         locationmode="ISO-3",
         color="count",
-        color_continuous_scale="Blues",
+        color_continuous_scale="Reds",
         title="Suspicious IPs by Country",
     )
     st.plotly_chart(fig_map, use_container_width=True)
