@@ -11,7 +11,7 @@ from typing import Optional
 warnings.filterwarnings("ignore")
 
 # Configuration
-DEFAULT_DATA_PATH = "./data/CloudWatch_Traffic_Web_Attack.csv"
+DEFAULT_DATA_PATH = "/data/CloudWatch_Traffic_Web_Attack.csv"
 
 # Features explicitly aligned to the provided heatmap
 FEATURES_TO_INCLUDE = [
