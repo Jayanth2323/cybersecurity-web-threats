@@ -10,7 +10,7 @@ from typing import Tuple
 warnings.filterwarnings("ignore")
 
 # Static CSV Load
-DATA_PATH = "/mnt/data/CloudWatch_Traffic_Web_Attack.csv"
+DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
 
 FEATURES_TO_INCLUDE = [
     "bytes_in",
