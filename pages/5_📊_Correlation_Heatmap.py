@@ -1,13 +1,16 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.express as px
+# import plotly.figure_factory as ff
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 from io import BytesIO
 from typing import Tuple
 
 warnings.filterwarnings("ignore")
+
+# Static CSV Load
+DATA_PATH = "/mnt/data/CloudWatch_Traffic_Web_Attack.csv"
 
 FEATURES_TO_INCLUDE = [
     "bytes_in",
@@ -27,27 +30,24 @@ FEATURES_TO_INCLUDE = [
     "src_ip_country_code_US",
 ]
 
-CSV_PATH = (
-    "data/CloudWatch_Traffic_Web_Attack.csv"  # Predefined file path
-)
-
 
 def configure_page():
     st.set_page_config(
         page_title="Network Traffic Correlation & Attack Analysis",
         layout="wide",
+        initial_sidebar_state="expanded",
     )
 
 
 @st.cache_data
-def load_and_prepare_data(file_path: str) -> pd.DataFrame:
-    df = pd.read_csv(file_path)
+def load_and_prepare_data() -> pd.DataFrame:
+    df = pd.read_csv(DATA_PATH)
 
-    # Parse datetime columns
+    # Parse datetime
     df["creation_time"] = pd.to_datetime(df["creation_time"])
     df["end_time"] = pd.to_datetime(df["end_time"])
 
-    # Compute session duration
+    # Compute duration
     df["duration_seconds"] = (
         df["end_time"] - df["creation_time"]
     ).dt.total_seconds()
@@ -58,7 +58,7 @@ def load_and_prepare_data(file_path: str) -> pd.DataFrame:
     )
     df = pd.concat([df, country_dummies], axis=1)
 
-    # Feature Scaling
+    # MinMax scaling
     scaler = MinMaxScaler()
     df["scaled_bytes_in"] = scaler.fit_transform(df[["bytes_in"]])
     df["scaled_bytes_out"] = scaler.fit_transform(df[["bytes_out"]])
@@ -73,48 +73,37 @@ def load_and_prepare_data(file_path: str) -> pd.DataFrame:
 
 
 def create_correlation_heatmap(
-    df: pd.DataFrame,
-) -> Tuple[plt.Figure, pd.DataFrame]:
+    df: pd.DataFrame
+) -> Tuple[px.imshow, pd.DataFrame]:
     corr = df.corr()
-    fig, ax = plt.subplots(figsize=(14, 12))
-    sns.heatmap(
-        corr,
-        annot=True,
-        fmt=".2f",
-        cmap="coolwarm",
-        center=0,
-        linewidths=1,
-        linecolor="white",
-        cbar_kws={"shrink": 0.7},
-        square=True,
-        mask=corr.isnull(),
-        ax=ax,
-    )
 
-    plt.xticks(rotation=45, ha="right")
-    plt.yticks(rotation=0)
-    plt.title("Correlation Matrix Heatmap", fontsize=16, pad=20)
-    plt.tight_layout()
+    fig = px.imshow(
+        corr,
+        text_auto=True,
+        color_continuous_scale="RdBu",
+        title="Correlation Matrix Heatmap",
+        aspect="auto",
+    )
+    fig.update_layout(margin=dict(l=40, r=40, t=80, b=40))
 
     return fig, corr
 
 
-def create_country_detection_barplot(df: pd.DataFrame) -> plt.Figure:
-    country_counts = df["src_ip_country_code"].value_counts()
+def create_country_detection_barplot(df: pd.DataFrame) -> px.bar:
+    country_counts = df["src_ip_country_code"].value_counts().reset_index()
+    country_counts.columns = ["Country Code", "Detections"]
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(
-        x=country_counts.index,
-        y=country_counts.values,
-        ax=ax,
-        palette="Blues_d",
+    fig = px.bar(
+        country_counts,
+        x="Country Code",
+        y="Detections",
+        title="Detection Types by Country Code",
+        color="Detections",
+        color_continuous_scale="Blues",
     )
-
-    ax.set_title("Detection Types by Country Code", fontsize=16)
-    ax.set_xlabel("Country Code", fontsize=12)
-    ax.set_ylabel("Frequency of Detection Types", fontsize=12)
-    ax.bar_label(ax.containers[0])
-    plt.tight_layout()
+    fig.update_layout(
+        xaxis_title="Country Code", yaxis_title="Detection Frequency"
+    )
 
     return fig
 
@@ -132,47 +121,70 @@ def main():
     st.title("🌐 Network Traffic Analytics Dashboard")
     st.markdown(
         """
-        This dashboard automatically processes internal traffic data to
-        deliver:
-        - 📈 **Feature Correlation Analysis**
-        - 🌎 **Geographical Attack Distribution**
+        📊 **Analyze CloudWatch Traffic:**
+        - Explore feature correlations
+        - Visualize detection patterns by country
         """
     )
 
     with st.spinner("Loading and processing data..."):
         try:
-            raw_df, features_df = load_and_prepare_data(CSV_PATH)
-
-            tab1, tab2, tab3 = st.tabs(
-                [
-                    "📈 Correlation Heatmap",
-                    "🌎 Country Detection",
-                    "📥 Download Matrix",
-                ]
-            )
-
-            with tab1:
-                st.subheader("📈 Correlation Matrix Heatmap")
-                corr_fig, corr_matrix = create_correlation_heatmap(features_df)
-                st.pyplot(corr_fig)
-
-            with tab2:
-                st.subheader("🌎 Detection Types by Country Code")
-                barplot_fig = create_country_detection_barplot(raw_df)
-                st.pyplot(barplot_fig)
-
-            with tab3:
-                st.subheader("📥 Download Correlation Matrix")
-                csv = convert_df_to_csv(corr_matrix)
-                st.download_button(
-                    label="Download Correlation Matrix as CSV",
-                    data=csv,
-                    file_name="correlation_matrix.csv",
-                    mime="text/csv",
-                )
-
+            raw_df, features_df = load_and_prepare_data()
         except Exception as e:
-            st.error(f"🚨 An error occurred: {str(e)}")
+            st.error(f"🚨 Critical Error: {e}")
+            st.stop()
+
+    # Sidebar filters
+    st.sidebar.header("🔎 Filter Options")
+
+    selected_countries = st.sidebar.multiselect(
+        "Select Country Codes",
+        options=raw_df["src_ip_country_code"].unique(),
+        default=list(raw_df["src_ip_country_code"].unique()),
+    )
+
+    duration_range = st.sidebar.slider(
+        "Select Duration Range (seconds)",
+        min_value=0,
+        max_value=int(raw_df["duration_seconds"].max()),
+        value=(0, int(raw_df["duration_seconds"].max())),
+    )
+
+    # Filter data based on user input
+    filtered_df = raw_df[
+        (raw_df["src_ip_country_code"].isin(selected_countries))
+        & (
+            raw_df["duration_seconds"].between(
+                duration_range[0], duration_range[1]
+            )
+        )
+    ]
+
+    st.sidebar.success(f"Filtered dataset size: {filtered_df.shape[0]} rows")
+
+    tabs = st.tabs(
+        ["📈 Correlation Heatmap", "🌎 Detection Types", "📥 Download Matrix"]
+    )
+
+    with tabs[0]:
+        st.subheader("Correlation Heatmap (Filtered)")
+        corr_fig, corr_matrix = create_correlation_heatmap(features_df)
+        st.plotly_chart(corr_fig, use_container_width=True)
+
+    with tabs[1]:
+        st.subheader("Detection Frequency by Country (Filtered)")
+        bar_fig = create_country_detection_barplot(filtered_df)
+        st.plotly_chart(bar_fig, use_container_width=True)
+
+    with tabs[2]:
+        st.subheader("Download Correlation Matrix")
+        csv = convert_df_to_csv(corr_matrix)
+        st.download_button(
+            label="Download Correlation Matrix as CSV",
+            data=csv,
+            file_name="correlation_matrix.csv",
+            mime="text/csv",
+        )
 
 
 if __name__ == "__main__":
