@@ -28,7 +28,7 @@ FEATURES_TO_INCLUDE = [
 ]
 
 CSV_PATH = (
-    "/mnt/data/CloudWatch_Traffic_Web_Attack.csv"  # Predefined file path
+    "data/CloudWatch_Traffic_Web_Attack.csv"  # Predefined file path
 )
 
 
