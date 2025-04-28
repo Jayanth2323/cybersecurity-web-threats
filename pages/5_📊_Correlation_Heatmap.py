@@ -1,22 +1,206 @@
-import streamlit as st
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-import warnings
-# from datetime import datetime
-from sklearn.preprocessing import MinMaxScaler
+import seaborn as sns
+import numpy as np
+import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 
-# Standard library
-from typing import Optional
+# Define the correlation matrix data as per the table
+data = {
+    "bytes_in": [
+        1.00,
+        1.00,
+        np.nan,
+        np.nan,
+        np.nan,
+        1.00,
+        1.00,
+        np.nan,
+        -0.07,
+        -0.08,
+        -0.17,
+        -0.10,
+        -0.07,
+        -0.01,
+        0.32,
+    ],
+    "bytes_out": [
+        1.00,
+        1.00,
+        np.nan,
+        np.nan,
+        np.nan,
+        1.00,
+        1.00,
+        np.nan,
+        -0.07,
+        -0.08,
+        -0.16,
+        -0.09,
+        -0.07,
+        -0.05,
+        0.33,
+    ],
+    "response.code": [np.nan] * 15,
+    "dst_port": [np.nan] * 15,
+    "duration_seconds": [np.nan] * 15,
+    "scaled_bytes_in": [
+        1.00,
+        1.00,
+        np.nan,
+        np.nan,
+        np.nan,
+        1.00,
+        1.00,
+        np.nan,
+        -0.07,
+        -0.08,
+        -0.17,
+        -0.10,
+        -0.07,
+        -0.01,
+        0.32,
+    ],
+    "scaled_bytes_out": [
+        1.00,
+        1.00,
+        np.nan,
+        np.nan,
+        np.nan,
+        1.00,
+        1.00,
+        np.nan,
+        -0.07,
+        -0.08,
+        -0.16,
+        -0.09,
+        -0.07,
+        -0.05,
+        0.33,
+    ],
+    "scaled_duration_seconds": [np.nan] * 15,
+    "src_ip_country_code_AE": [
+        -0.07,
+        -0.07,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.07,
+        -0.07,
+        np.nan,
+        1.00,
+        -0.07,
+        -0.14,
+        -0.08,
+        -0.06,
+        -0.06,
+        -0.20,
+    ],
+    "src_ip_country_code_AT": [
+        -0.08,
+        -0.08,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.08,
+        -0.08,
+        np.nan,
+        -0.07,
+        1.00,
+        -0.17,
+        -0.09,
+        -0.06,
+        -0.07,
+        -0.23,
+    ],
+    "src_ip_country_code_CA": [
+        -0.17,
+        -0.16,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.17,
+        -0.16,
+        np.nan,
+        -0.14,
+        -0.17,
+        1.00,
+        -0.19,
+        -0.13,
+        -0.15,
+        -0.48,
+    ],
+    "src_ip_country_code_DE": [
+        -0.10,
+        -0.09,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.10,
+        -0.09,
+        np.nan,
+        -0.08,
+        -0.09,
+        -0.19,
+        1.00,
+        -0.08,
+        -0.09,
+        -0.27,
+    ],
+    "src_ip_country_code_IL": [
+        -0.07,
+        -0.07,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.07,
+        -0.07,
+        np.nan,
+        -0.06,
+        -0.06,
+        -0.13,
+        -0.08,
+        1.00,
+        -0.06,
+        -0.19,
+    ],
+    "src_ip_country_code_NL": [
+        -0.01,
+        -0.05,
+        np.nan,
+        np.nan,
+        np.nan,
+        -0.01,
+        -0.05,
+        np.nan,
+        -0.06,
+        -0.07,
+        -0.15,
+        -0.09,
+        -0.06,
+        1.00,
+        -0.21,
+    ],
+    "src_ip_country_code_US": [
+        0.32,
+        0.33,
+        np.nan,
+        np.nan,
+        np.nan,
+        0.32,
+        0.33,
+        np.nan,
+        -0.20,
+        -0.23,
+        -0.48,
+        -0.27,
+        -0.19,
+        -0.21,
+        1.00,
+    ],
+}
 
-# Suppress warnings for cleaner output
-warnings.filterwarnings("ignore")
-
-# Configuration
-DEFAULT_DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
-
-# Features aligned to the provided heatmap
-FEATURES_TO_INCLUDE = [
+# Row and column labels
+labels = [
     "bytes_in",
     "bytes_out",
     "response.code",
@@ -34,103 +218,51 @@ FEATURES_TO_INCLUDE = [
     "src_ip_country_code_US",
 ]
 
+# Create DataFrame
+corr = pd.DataFrame(data, index=labels)
 
-def configure_page():
-    """Configure Streamlit page settings."""
-    st.set_page_config(
-        page_title="Correlation Matrix",
-        layout="wide",
-    )
+# Set up the matplotlib figure
+fig, ax = plt.subplots(figsize=(12, 10))
 
-
-@st.cache_data
-def load_and_prepare_data(
-    file_path: str = DEFAULT_DATA_PATH,
-) -> Optional[pd.DataFrame]:
-    """Load dataset and prepare features for correlation analysis."""
-    try:
-        df = pd.read_csv(file_path)
-
-        # Calculate duration in seconds
-        df["creation_time"] = pd.to_datetime(df["creation_time"])
-        df["end_time"] = pd.to_datetime(df["end_time"])
-        df["duration_seconds"] = (
-            df["end_time"] - df["creation_time"]
-        ).dt.total_seconds()
-
-        # One-hot encode country codes
-        country_dummies = pd.get_dummies(
-            df["src_ip_country_code"], prefix="src_ip_country_code"
-        )
-        df = pd.concat([df, country_dummies], axis=1)
-
-        # Create scaled features
-        scaler = MinMaxScaler()
-        df["scaled_bytes_in"] = scaler.fit_transform(df[["bytes_in"]])
-        df["scaled_bytes_out"] = scaler.fit_transform(df[["bytes_out"]])
-        df["scaled_duration_seconds"] = scaler.fit_transform(
-            df[["duration_seconds"]]
-        )
-
-        # Select and order final features
-        final_df = df[FEATURES_TO_INCLUDE].copy()
-        return final_df.rename(columns={"response.code": "response_code"})
-
-    except Exception as e:
-        st.error(f"Data processing failed: {str(e)}")
-        return None
+# Define custom diverging colormap matching the red-beige-blue gradient
 
 
-def create_correlation_heatmap(df: pd.DataFrame) -> plt.Figure:
-    """Generate and return the correlation heatmap."""
-    st.subheader("Correlation Matrix Heatmap")
-    st.markdown(f"**Features Included:** `{', '.join(df.columns)}`")
+colors = ["#c70039", "#d9b7a9", "#2a4db7"]
+cmap = LinearSegmentedColormap.from_list("custom_red_beige_blue", colors)
 
-    corr = df.corr()
+# Plot the heatmap
+sns.heatmap(
+    corr,
+    ax=ax,
+    cmap=cmap,
+    center=0,
+    annot=True,
+    fmt=".2f",
+    linewidths=0.5,
+    linecolor="gray",
+    cbar_kws={"shrink": 0.8, "ticks": [1, 0, -0.4]},
+    square=True,
+    mask=corr.isnull(),
+)
 
-    fig, ax = plt.subplots(figsize=(14, 12))
-    sns.heatmap(
-        corr,
-        annot=True,
-        fmt=".2f",
-        cmap="coolwarm",
-        center=0,
-        linewidths=1,
-        linecolor="white",
-        square=True,
-        cbar_kws={"shrink": 0.7},
-        ax=ax,
-    )
+# Set title
+ax.set_title("Correlation Matrix Heatmap", fontsize=14, fontfamily="monospace")
 
-    plt.xticks(rotation=45, ha="right")
-    plt.yticks(rotation=0)
-    plt.title("Correlation Matrix Heatmap", fontsize=16, pad=20)
-    plt.tight_layout()
-    return fig
-
-
-def main():
-    configure_page()
-    st.title("📊 Feature Correlation Analysis")
-    st.markdown(
-        """
-        This heatmap offers insights into linear relationships between
-        selected features, aiding in the discovery of data patterns,
-        multicollinearity, and model improvement opportunities.
-        """
-    )
-
-    df = load_and_prepare_data()
-    if df is None:
-        st.error("Cannot display heatmap without sufficient feature data.")
-        return
-
-    try:
-        fig = create_correlation_heatmap(df)
-        st.pyplot(fig)
-    except Exception as e:
-        st.error(f"Heatmap generation error: {str(e)}")
-
-
-if __name__ == "__main__":
-    main()
+# Rotate x-axis labels to vertical with monospace font
+ax.set_xticklabels(
+    ax.get_xticklabels(),
+    rotation=90,
+    ha="center",
+    fontfamily="monospace",
+    fontsize=8,
+)
+# Left-align y-axis labels with monospace font
+ax.set_yticklabels(
+    ax.get_yticklabels(),
+    rotation=0,
+    ha="right",
+    fontfamily="monospace",
+    fontsize=8,
+)
+plt.tight_layout()
+plt.show()
