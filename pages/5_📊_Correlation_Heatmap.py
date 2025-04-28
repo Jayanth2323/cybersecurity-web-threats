@@ -11,7 +11,7 @@ from typing import Optional
 warnings.filterwarnings("ignore")
 
 # Configuration
-DEFAULT_DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
+DEFAULT_DATA_PATH = "./data/CloudWatch_Traffic_Web_Attack.csv"
 
 # Features explicitly aligned to the provided heatmap
 FEATURES_TO_INCLUDE = [
@@ -38,11 +38,11 @@ def configure_page():
     st.set_page_config(
         page_title="Correlation Matrix",
         layout="wide",
-        menu_items={
-            "Get Help": "https://example.com/help",
-            "Report a bug": "https://example.com/bug",
-            "About": "# Network Traffic Analyzer",
-        },
+        # menu_items={
+        #     "Get Help": "https://example.com/help",
+        #     "Report a bug": "https://example.com/bug",
+        #     "About": "# Network Traffic Analyzer",
+        # },
     )
 
 
