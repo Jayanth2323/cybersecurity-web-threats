@@ -9,9 +9,6 @@ from typing import Optional
 # Suppress warnings
 warnings.filterwarnings("ignore")
 
-# Configuration
-DEFAULT_DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
-
 # Features aligned to your original heatmap
 FEATURES_TO_INCLUDE = [
     "bytes_in",
@@ -41,12 +38,10 @@ def configure_page():
 
 
 @st.cache_data
-def load_and_prepare_data(
-    file_path: str = DEFAULT_DATA_PATH,
-) -> Optional[pd.DataFrame]:
-    """Load and process the CSV data."""
+def load_and_prepare_data(uploaded_file) -> Optional[pd.DataFrame]:
+    """Load and process the uploaded CSV data."""
     try:
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(uploaded_file)
 
         # Parse datetime columns
         df["creation_time"] = pd.to_datetime(df["creation_time"])
@@ -70,6 +65,7 @@ def load_and_prepare_data(
         df["scaled_duration_seconds"] = scaler.fit_transform(
             df[["duration_seconds"]]
         )
+
         # Select and prepare the final set of features
         final_df = df[FEATURES_TO_INCLUDE].copy()
         final_df = final_df.rename(columns={"response.code": "response_code"})
@@ -125,16 +121,23 @@ def main():
         """
     )
 
-    df = load_and_prepare_data()
-    if df is None:
-        st.error("Unable to generate the correlation matrix.")
-        return
+    uploaded_file = st.file_uploader(
+        "Upload the CloudWatch Traffic Web Attack CSV file", type=["csv"]
+    )
 
-    try:
-        fig = create_correlation_heatmap(df)
-        st.pyplot(fig)
-    except Exception as e:
-        st.error(f"Heatmap generation error: {str(e)}")
+    if uploaded_file is not None:
+        df = load_and_prepare_data(uploaded_file)
+        if df is None:
+            st.error("Unable to generate the correlation matrix.")
+            return
+
+        try:
+            fig = create_correlation_heatmap(df)
+            st.pyplot(fig)
+        except Exception as e:
+            st.error(f"Heatmap generation error: {str(e)}")
+    else:
+        st.info("Please upload a CSV file to proceed.")
 
 
 if __name__ == "__main__":
