@@ -276,7 +276,7 @@ plt.show()
 warnings.filterwarnings("ignore")
 
 # Configuration
-DEFAULT_DATA_PATH = "data/analyzed_output.csv"
+DEFAULT_DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
 
 
 def configure_page():
