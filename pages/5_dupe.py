@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 from io import BytesIO
-from typing import Tuple
 
 warnings.filterwarnings("ignore")
 
@@ -27,17 +26,13 @@ FEATURES_TO_INCLUDE = [
     "src_ip_country_code_US",
 ]
 
-CSV_PATH = (
-    "/mnt/data/CloudWatch_Traffic_Web_Attack.csv"  # Predefined file path
-)
-
+CSV_PATH = "/mnt/data/CloudWatch_Traffic_Web_Attack.csv"  # Predefined file path
 
 def configure_page():
     st.set_page_config(
         page_title="Network Traffic Correlation & Attack Analysis",
         layout="wide",
     )
-
 
 @st.cache_data
 def load_and_prepare_data(file_path: str) -> pd.DataFrame:
@@ -48,34 +43,26 @@ def load_and_prepare_data(file_path: str) -> pd.DataFrame:
     df["end_time"] = pd.to_datetime(df["end_time"])
 
     # Compute session duration
-    df["duration_seconds"] = (
-        df["end_time"] - df["creation_time"]
-    ).dt.total_seconds()
+    df["duration_seconds"] = (df["end_time"] - df["creation_time"]).dt.total_seconds()
 
     # One-hot encode country codes
-    country_dummies = pd.get_dummies(
-        df["src_ip_country_code"], prefix="src_ip_country_code"
-    )
+    country_dummies = pd.get_dummies(df["src_ip_country_code"], prefix="src_ip_country_code")
     df = pd.concat([df, country_dummies], axis=1)
 
     # Feature Scaling
     scaler = MinMaxScaler()
     df["scaled_bytes_in"] = scaler.fit_transform(df[["bytes_in"]])
     df["scaled_bytes_out"] = scaler.fit_transform(df[["bytes_out"]])
-    df["scaled_duration_seconds"] = scaler.fit_transform(
-        df[["duration_seconds"]]
-    )
+    df["scaled_duration_seconds"] = scaler.fit_transform(df[["duration_seconds"]])
 
     final_df = df[FEATURES_TO_INCLUDE].copy()
     final_df = final_df.rename(columns={"response.code": "response_code"})
 
     return df, final_df
 
-
-def create_correlation_heatmap(
-    df: pd.DataFrame,
-) -> Tuple[plt.Figure, pd.DataFrame]:
+def create_correlation_heatmap(df: pd.DataFrame) -> (plt.Figure, pd.DataFrame):
     corr = df.corr()
+
     fig, ax = plt.subplots(figsize=(14, 12))
     sns.heatmap(
         corr,
@@ -98,7 +85,6 @@ def create_correlation_heatmap(
 
     return fig, corr
 
-
 def create_country_detection_barplot(df: pd.DataFrame) -> plt.Figure:
     country_counts = df["src_ip_country_code"].value_counts()
 
@@ -118,13 +104,11 @@ def create_country_detection_barplot(df: pd.DataFrame) -> plt.Figure:
 
     return fig
 
-
 def convert_df_to_csv(df: pd.DataFrame) -> BytesIO:
     output = BytesIO()
     df.to_csv(output, index=True)
     output.seek(0)
     return output
-
 
 def main():
     configure_page()
@@ -132,8 +116,7 @@ def main():
     st.title("🌐 Network Traffic Analytics Dashboard")
     st.markdown(
         """
-        This dashboard automatically processes internal traffic data to
-        deliver:
+        This dashboard automatically processes internal traffic data to deliver:
         - 📈 **Feature Correlation Analysis**
         - 🌎 **Geographical Attack Distribution**
         """
@@ -143,13 +126,7 @@ def main():
         try:
             raw_df, features_df = load_and_prepare_data(CSV_PATH)
 
-            tab1, tab2, tab3 = st.tabs(
-                [
-                    "📈 Correlation Heatmap",
-                    "🌎 Country Detection",
-                    "📥 Download Matrix",
-                ]
-            )
+            tab1, tab2, tab3 = st.tabs(["📈 Correlation Heatmap", "🌎 Country Detection", "📥 Download Matrix"])
 
             with tab1:
                 st.subheader("📈 Correlation Matrix Heatmap")
@@ -173,7 +150,6 @@ def main():
 
         except Exception as e:
             st.error(f"🚨 An error occurred: {str(e)}")
-
 
 if __name__ == "__main__":
     main()
