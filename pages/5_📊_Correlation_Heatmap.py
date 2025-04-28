@@ -3,6 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
+# from datetime import datetime
+from sklearn.preprocessing import MinMaxScaler
 
 # Standard library
 from typing import Optional
@@ -11,13 +13,13 @@ from typing import Optional
 warnings.filterwarnings("ignore")
 
 # Configuration
-DEFAULT_DATA_PATH = "data/CloudWatch_Traffic_Web_Attack.csv"
+DEFAULT_DATA_PATH = "CloudWatch_Traffic_Web_Attack.csv"
 
-# Features explicitly aligned to the provided heatmap
+# Features aligned to the provided heatmap
 FEATURES_TO_INCLUDE = [
     "bytes_in",
     "bytes_out",
-    "response_code",
+    "response.code",
     "dst_port",
     "duration_seconds",
     "scaled_bytes_in",
@@ -38,11 +40,6 @@ def configure_page():
     st.set_page_config(
         page_title="Correlation Matrix",
         layout="wide",
-        # menu_items={
-        #     "Get Help": "https://example.com/help",
-        #     "Report a bug": "https://example.com/bug",
-        #     "About": "# Network Traffic Analyzer",
-        # },
     )
 
 
@@ -50,23 +47,37 @@ def configure_page():
 def load_and_prepare_data(
     file_path: str = DEFAULT_DATA_PATH,
 ) -> Optional[pd.DataFrame]:
-    """Load dataset and filter relevant features for correlation analysis."""
+    """Load dataset and prepare features for correlation analysis."""
     try:
         df = pd.read_csv(file_path)
-        # Ensure only selected columns are loaded if they exist
-        selected_columns = [
-            col for col in FEATURES_TO_INCLUDE if col in df.columns
-        ]
 
-        if len(selected_columns) < 2:
-            st.warning(
-                "Insufficient columns available for correlation analysis."
-            )
-            return None
+        # Calculate duration in seconds
+        df["creation_time"] = pd.to_datetime(df["creation_time"])
+        df["end_time"] = pd.to_datetime(df["end_time"])
+        df["duration_seconds"] = (
+            df["end_time"] - df["creation_time"]
+        ).dt.total_seconds()
 
-        return df[selected_columns]
+        # One-hot encode country codes
+        country_dummies = pd.get_dummies(
+            df["src_ip_country_code"], prefix="src_ip_country_code"
+        )
+        df = pd.concat([df, country_dummies], axis=1)
+
+        # Create scaled features
+        scaler = MinMaxScaler()
+        df["scaled_bytes_in"] = scaler.fit_transform(df[["bytes_in"]])
+        df["scaled_bytes_out"] = scaler.fit_transform(df[["bytes_out"]])
+        df["scaled_duration_seconds"] = scaler.fit_transform(
+            df[["duration_seconds"]]
+        )
+
+        # Select and order final features
+        final_df = df[FEATURES_TO_INCLUDE].copy()
+        return final_df.rename(columns={"response.code": "response_code"})
+
     except Exception as e:
-        st.error(f"Data loading failed: {str(e)}")
+        st.error(f"Data processing failed: {str(e)}")
         return None
 
 
@@ -77,12 +88,12 @@ def create_correlation_heatmap(df: pd.DataFrame) -> plt.Figure:
 
     corr = df.corr()
 
-    fig, ax = plt.subplots(figsize=(14, 12))  # Adjusted size for clarity
+    fig, ax = plt.subplots(figsize=(14, 12))
     sns.heatmap(
         corr,
         annot=True,
         fmt=".2f",
-        cmap="coolwarm",  # Match to the reference image
+        cmap="coolwarm",
         center=0,
         linewidths=1,
         linecolor="white",
@@ -91,7 +102,6 @@ def create_correlation_heatmap(df: pd.DataFrame) -> plt.Figure:
         ax=ax,
     )
 
-    # Fine-tuned axis label rotation for readability
     plt.xticks(rotation=45, ha="right")
     plt.yticks(rotation=0)
     plt.title("Correlation Matrix Heatmap", fontsize=16, pad=20)
@@ -105,7 +115,7 @@ def main():
     st.markdown(
         """
         This heatmap offers insights into linear relationships between
-        selected features,aiding in the discovery of data patterns,
+        selected features, aiding in the discovery of data patterns,
         multicollinearity, and model improvement opportunities.
         """
     )
