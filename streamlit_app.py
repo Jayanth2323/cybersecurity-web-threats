@@ -11,6 +11,7 @@ st.set_page_config(page_title="Threat Dashboard", layout="wide")
 
 st.markdown(
     """
+#           🐱‍💻 Cybersecurity 🐱‍💻
 # 🔐 Suspicious Web Threat Interactions
 Welcome to the enterprise-grade cybersecurity analytics system.
 Navigate the sections using the sidebar.

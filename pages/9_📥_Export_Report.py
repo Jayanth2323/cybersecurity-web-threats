@@ -47,7 +47,7 @@ with st.sidebar:
     report_title = st.text_input(
         "Report Title", "Cybersecurity Threat Summary"
     )
-    analyst_name = st.text_input("Prepared By", "Security Team")
+    analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
     report_date = st.date_input("Report Date", datetime.date.today())
     department = st.selectbox(
         "Department", ["All", "IT", "Finance", "HR", "Operations"]
@@ -83,7 +83,7 @@ with tab1:
     st.dataframe(
         filtered_df.style.apply(
             lambda x: [
-                "background: #FFCCCC" if x.anomaly == "suspicious" else ""
+                "background: #FF0000" if x.anomaly == "suspicious" else ""
                 for _ in x
             ],
             axis=1,
@@ -151,7 +151,7 @@ def _extracted_from_generate_excel_report_7(df, writer, title):
         worksheet.set_column(i, i, min(max_len, 50))
 
     # Conditional formatting for anomalies
-    suspicious_format = workbook.add_format({"bg_color": "#FFC7CE"})
+    suspicious_format = workbook.add_format({"bg_color": "#FF0000"})
     worksheet.conditional_format(
         1,
         0,
