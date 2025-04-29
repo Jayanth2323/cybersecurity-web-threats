@@ -74,7 +74,7 @@ def create_interaction_graph(
     label_dict = {node: node for node in G.nodes() if node != central_node}
     nx.draw_networkx_labels(
         G, pos, labels=label_dict, font_size=8, font_color="navy", ax=ax
-        )
+    )
 
     ax.set_title("Network Interaction between Source IPs", fontsize=14)
     ax.axis("off")

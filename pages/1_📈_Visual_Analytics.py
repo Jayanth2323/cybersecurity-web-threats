@@ -47,10 +47,7 @@ else:
     else:
         st.info("No suspicious activity data available.")
 
-custom_palette = {
-    "Normal": "#377eb8",
-    "Suspicious": "#e41a1c"
-}
+custom_palette = {"Normal": "#377eb8", "Suspicious": "#e41a1c"}
 # 📈 Scatterplot: Bytes In vs Bytes Out
 st.subheader("📈 Anomaly Scatterplot: Bytes In vs Out")
 
@@ -61,7 +58,7 @@ sns.scatterplot(
     y="bytes_out",
     hue="anomaly",
     palette=custom_palette,
-    ax=ax
+    ax=ax,
 )
 ax.set_xlabel("Bytes In")
 ax.set_ylabel("Bytes Out")
@@ -80,12 +77,8 @@ st.write(df.groupby("anomaly").describe())
 st.subheader("📊 Data Distribution")
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.histplot(
-    data=df,
-    x="bytes_in",
-    hue="anomaly",
-    palette=custom_palette,
-    ax=ax
-    )
+    data=df, x="bytes_in", hue="anomaly", palette=custom_palette, ax=ax
+)
 ax.set_xlabel("Bytes In")
 ax.set_ylabel("Frequency")
 ax.set_title("Data Distribution")
