@@ -1,50 +1,86 @@
-def create_correlation_heatmap(
-    df: pd.DataFrame,
-) -> Tuple[px.imshow, pd.DataFrame]:
-    corr = df.corr()
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+import warnings
 
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(
-        corr,
-        annot=True,
-        fmt=".2f",  # Change format to display 2 decimal places
-        cmap="coolwarm",
-        annot_kws={"size": 12},  # Increase font size here
-        cbar_kws={"shrink": 0.82},
+st.title("📊 Visual Analytics: Anomalies & Traffic Patterns")
+
+
+@st.cache_data
+def load_data():
+    try:
+        return pd.read_csv("data/analyzed_output.csv")
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        return pd.DataFrame()  # Return empty DataFrame on error
+
+
+df = load_data()
+
+if df.empty:
+    st.warning("No data loaded - some visualizations may not work")
+else:
+    # Filter for Suspicious only
+    df_suspicious = df[df["anomaly"] == "Suspicious"]
+
+    # 🌍 Choropleth Map
+    st.subheader("🗺️ Suspicious Activities by Country")
+    country_counts = (
+        df_suspicious.groupby("src_ip_country_code")
+        .size()
+        .reset_index(name="count")
     )
 
-    # Show the plot in Streamlit
-    st.pyplot(plt)
+    if not country_counts.empty:
+        fig_map = px.choropleth(
+            country_counts,
+            locations="src_ip_country_code",
+            locationmode="ISO-3",
+            color="count",
+            color_continuous_scale="Reds",
+            title="Suspicious IPs by Country",
+            hover_name="src_ip_country_code",
+        )
+        st.plotly_chart(fig_map, use_container_width=True)
+    else:
+        st.info("No suspicious activity data available.")
 
-    fig = px.imshow(
-        corr,
-        text_auto=lambda z: f'{z:.2f}',  # Format correlation values to 2 decimal places
-        color_continuous_scale=[
-            (1.0, "maroon"),
-            (0.5, "lightblue"),
-            (0.0, "blue"),
-            (0.3, "lightblue"),  # Added for a smoother gradient
-            (0.2, "lightblue"),
-            (0.1, "lightblue"),
-            (0.0, "blue"),
-        ],
-        title="Correlation Matrix Heatmap",
-        aspect="auto",
-        height=900,
-        width=1200,
-    )
-    fig.update_layout(
-        margin=dict(l=40, r=40, t=80, b=40),
-        coloraxis_colorbar=dict(
-            title="Correlation",
-            tickvals=[-1, -0.5, 0, 0.5, 1],
-            ticks="outside",
-        ),
-        title=dict(font=dict(size=24)),
-        xaxis_title=dict(font=dict(size=18)),
-        yaxis_title=dict(font=dict(size=18)),
-    )
+# Define custom palette with swapped colors for 'normal' and 'suspicious'
+# Original Set1 colors for first two categories: red and blue (approx)
+# We swap them here
+custom_palette = {
+    "Normal": "#e41a1c",      # originally suspicious color (red)
+    "Suspicious": "#377eb8"   # originally normal color (blue)
+}
 
-    fig.update_traces(textfont=dict(size=10))
+# 📈 Scatterplot: Bytes In vs Bytes Out
+st.subheader("📈 Anomaly Scatterplot: Bytes In vs Out")
 
-    return fig, corr
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.scatterplot(
+    data=df, x="bytes_in", y="bytes_out", hue="anomaly", palette=custom_palette, ax=ax
+)
+ax.set_xlabel("Bytes In")
+ax.set_ylabel("Bytes Out")
+ax.set_title("Anomaly Scatterplot")
+st.pyplot(fig)
+
+# 📊 Descriptive Statistics
+st.subheader("📊 Statistical Summary")
+st.write(df.describe())
+
+# Additional statistics
+st.subheader("📊 Additional Statistics")
+st.write(df.groupby("anomaly").describe())
+
+# Data distribution
+st.subheader("📊 Data Distribution")
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.histplot(data=df, x="bytes_in", hue="anomaly", palette=custom_palette, ax=ax)
+ax.set_xlabel("Bytes In")
+ax.set_ylabel("Frequency")
+ax.set_title("Data Distribution")
+st.pyplot(fig)
+warnings.filterwarnings("ignore")

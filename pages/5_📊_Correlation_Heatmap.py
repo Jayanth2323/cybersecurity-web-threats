@@ -72,6 +72,12 @@ def load_and_prepare_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     final_df = df[FEATURES_TO_INCLUDE].copy()
     final_df = final_df.rename(columns={"response.code": "response_code"})
 
+    # def round_decimal(x):
+    #     rounded = round(x, 2)
+    #     return FormattedValue if rounded != 1.0 else f"{rounded:.2f}"
+    def round_decimal(x):
+        return f"{x:.2f}" if isinstance(x, (int, float)) else x
+
     decimal_cols = [
         "bytes_in",
         "bytes_out",
@@ -80,9 +86,13 @@ def load_and_prepare_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
         "scaled_bytes_out",
         "scaled_duration_seconds",
     ]
-    final_df[decimal_cols] = final_df[decimal_cols].applymap(
-        lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x
-    )
+    final_df[decimal_cols] = final_df[decimal_cols].applymap(round_decimal)
+    # final_df[decimal_cols] = final_df[decimal_cols].applymap(
+    #     lambda x: round_decimal(x) if isinstance(x, (int(float))) else x
+    # )
+    # final_df[decimal_cols] = final_df[decimal_cols].applymap(
+    #     lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x
+    # )
 
     return df, final_df
 
@@ -107,7 +117,7 @@ def create_correlation_heatmap(
 
     fig = px.imshow(
         corr,
-        text_auto=True,
+        text_auto=".2f",
         color_continuous_scale=[
             (1.0, "maroon"),
             (0.5, "lightblue"),
@@ -134,7 +144,7 @@ def create_correlation_heatmap(
         yaxis_title=dict(font=dict(size=18)),
     )
 
-    fig.update_traces(textfont=dict(size=10))
+    fig.update_traces(textfont=dict(size=12))
 
     return fig, corr
 
