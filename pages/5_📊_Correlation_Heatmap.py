@@ -72,6 +72,18 @@ def load_and_prepare_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     final_df = df[FEATURES_TO_INCLUDE].copy()
     final_df = final_df.rename(columns={"response.code": "response_code"})
 
+    decimal_cols = [
+        "bytes_in",
+        "bytes_out",
+        "duration_seconds",
+        "scaled_bytes_in",
+        "scaled_bytes_out",
+        "scaled_duration_seconds",
+    ]
+    final_df[decimal_cols] = final_df[decimal_cols].applymap(
+        lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x
+    )
+
     return df, final_df
 
 
