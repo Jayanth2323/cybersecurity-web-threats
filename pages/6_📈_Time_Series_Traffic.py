@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-# import seaborn as sns
 from io import BytesIO
 import warnings
 from st_aggrid import AgGrid, GridOptionsBuilder
@@ -55,10 +54,7 @@ def plot_traffic(
     if view_mode == "Volume (Bytes)":
         grouped = (
             df.groupby("time_bin")
-            .agg(
-                bytes_in=("bytes_in", "sum"),
-                bytes_out=("bytes_out", "sum"),
-            )
+            .agg(bytes_in=("bytes_in", "sum"), bytes_out=("bytes_out", "sum"))
             .reset_index()
         )
     else:
@@ -81,20 +77,22 @@ def plot_traffic(
                 marker="o",
             )
         else:
+            bar_width = 0.015
             ax.bar(
                 grouped["time_bin"],
                 grouped["bytes_in"],
-                width=0.02,
+                width=bar_width,
                 label="Bytes In",
                 alpha=0.7,
+                align="center",
             )
             ax.bar(
-                grouped["time_bin"],
+                grouped["time_bin"] + pd.Timedelta(minutes=20),
                 grouped["bytes_out"],
-                width=0.02,
-                bottom=grouped["bytes_in"],
+                width=bar_width,
                 label="Bytes Out",
                 alpha=0.7,
+                align="center",
             )
     elif plot_type == "Line":
         ax.plot(
@@ -111,7 +109,7 @@ def plot_traffic(
             width=0.02,
         )
 
-    if show_anomalies:
+    if show_anomalies and "anomaly" in df.columns:
         suspicious = (
             df[df["anomaly"] == "Suspicious"]
             .groupby("time_bin")
@@ -123,7 +121,7 @@ def plot_traffic(
                 x=row["time_bin"], color="red", linestyle="--", alpha=0.25
             )
 
-    ax.set_title("Web Traffic Over Time", fontsize=14)
+    ax.set_title("Web Traffic Analysis Over Time", fontsize=14)
     ax.set_xlabel("Time", fontsize=12)
     ax.set_ylabel(
         "Volume (Bytes)" if view_mode == "Volume (Bytes)" else "Record Count",
@@ -179,7 +177,6 @@ def main():
     fig = plot_traffic(df, view_mode, plot_type, show_anomalies)
     st.pyplot(fig)
     download_plot(fig)
-
     show_interactive_table(df)
 
 
