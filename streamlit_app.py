@@ -229,6 +229,11 @@ st.download_button(
 st.subheader("🧾 Filtered Data View")
 st.dataframe(filtered_df, use_container_width=True)
 
+custom_palette = {
+    "Normal": "#377eb8",
+    "Suspicious": "#e41a1c"
+}
+
 # Anomaly Scatterplot
 st.subheader("📈 Anomaly Scatterplot")
 
@@ -239,7 +244,7 @@ if not filtered_df.empty:
         x="bytes_in",
         y="bytes_out",
         hue="anomaly",
-        palette="Set1",
+        palette=custom_palette,
         ax=ax,
     )
     st.pyplot(fig)
