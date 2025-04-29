@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-# import plotly.figure_factory as ff
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 from io import BytesIO
@@ -72,9 +70,6 @@ def load_and_prepare_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     final_df = df[FEATURES_TO_INCLUDE].copy()
     final_df = final_df.rename(columns={"response.code": "response_code"})
 
-    # def round_decimal(x):
-    #     rounded = round(x, 2)
-    #     return FormattedValue if rounded != 1.0 else f"{rounded:.2f}"
     def round_decimal(x):
         return f"{x:.2f}" if isinstance(x, (int, float)) else x
 
@@ -87,12 +82,6 @@ def load_and_prepare_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
         "scaled_duration_seconds",
     ]
     final_df[decimal_cols] = final_df[decimal_cols].applymap(round_decimal)
-    # final_df[decimal_cols] = final_df[decimal_cols].applymap(
-    #     lambda x: round_decimal(x) if isinstance(x, (int(float))) else x
-    # )
-    # final_df[decimal_cols] = final_df[decimal_cols].applymap(
-    #     lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x
-    # )
 
     return df, final_df
 
@@ -152,6 +141,7 @@ def create_correlation_heatmap(
 def create_country_detection_barplot(df: pd.DataFrame) -> px.bar:
     country_counts = df["src_ip_country_code"].value_counts().reset_index()
     country_counts.columns = ["Country Code", "Detections"]
+    country_counts = country_counts.sort_values("Country Code")
 
     fig = px.bar(
         country_counts,
@@ -199,8 +189,8 @@ def main():
 
     selected_countries = st.sidebar.multiselect(
         "Select Country Codes",
-        options=raw_df["src_ip_country_code"].unique(),
-        default=list(raw_df["src_ip_country_code"].unique()),
+        options=sorted(raw_df["src_ip_country_code"].unique()),
+        default=sorted(raw_df["src_ip_country_code"].unique()),
     )
 
     duration_range = st.sidebar.slider(
