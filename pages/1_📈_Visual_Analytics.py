@@ -48,8 +48,8 @@ else:
         st.info("No suspicious activity data available.")
 
 custom_palette = {
-    "Normal": "#377eb8",      
-    "Suspicious": "#e41a1c"   
+    "Normal": "#377eb8",
+    "Suspicious": "#e41a1c"
 }
 # 📈 Scatterplot: Bytes In vs Bytes Out
 st.subheader("📈 Anomaly Scatterplot: Bytes In vs Out")
