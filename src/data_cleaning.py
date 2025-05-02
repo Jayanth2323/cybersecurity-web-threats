@@ -22,7 +22,11 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         KeyError: If required columns are missing
     """
     required_columns = [
-        "creation_time", "end_time", "time", "src_ip_country_code"]
+        "creation_time",
+        "end_time",
+        "time",
+        "src_ip_country_code",
+    ]
     if missing_columns := [
         col for col in required_columns if col not in df.columns
     ]:
