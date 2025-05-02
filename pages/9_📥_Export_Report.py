@@ -49,9 +49,9 @@ with st.sidebar:
     )
     analyst_name = st.text_input("Prepared By", "Jayanth Chennoju")
     report_date = st.date_input("Report Date", datetime.date.today())
-    department = st.selectbox(
-        "Department", ["All", "IT", "Finance", "HR", "Operations"]
-    )
+    # department = st.selectbox(
+    #     "Department", ["All", "IT", "Finance", "HR", "Operations"]
+    # )
 
     # Additional filters
     st.header("Data Filters")
@@ -70,8 +70,8 @@ with st.sidebar:
 filtered_df = df[df["anomaly"].isin(selected_status)].copy()
 if "severity" in df.columns and "selected_severity" in locals():
     filtered_df = filtered_df[filtered_df["severity"].isin(selected_severity)]
-if department != "All":
-    filtered_df = filtered_df[filtered_df["department"] == department]
+# if department != "All":
+#     filtered_df = filtered_df[filtered_df["department"] == department]
 
 # Main content area
 st.header("Report Preview")
