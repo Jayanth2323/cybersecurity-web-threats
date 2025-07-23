@@ -83,8 +83,8 @@ cybersecurity-web-threats/
 ---
 
 ## 👨‍💻 Author
-**Jayanth Chennoju** — [Jayanth2323](https://github.com/Jayanth2323),.
-**LinkedIn** — [🪪](https://linkedin.com/in/jayanth-chennoju-5a738923k/),.
+**Jayanth Chennoju** — [Jayanth2323](https://github.com/Jayanth2323).
+**LinkedIn** — [🪪](https://linkedin.com/in/jayanth-chennoju-5a738923k/).
 **Mail id** — .[📨](jayanthchennoju@gmail.com).
 
 Feel free to collaborate with us: 
