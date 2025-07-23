@@ -83,9 +83,12 @@ cybersecurity-web-threats/
 ---
 
 ## 👨‍💻 Author
-**Jayanth Chennoju** — [Jayanth2323](https://github.com/Jayanth2323),.[🪪](https://linkedin.com/in/jayanth-chennoju-5a738923k/)
-I warmly welcome community contributions. Feel free to fork, improve, or submit a pull request!
+**Jayanth Chennoju** — [Jayanth2323](https://github.com/Jayanth2323),.
+**LinkedIn** — [🪪](https://linkedin.com/in/jayanth-chennoju-5a738923k/),.
+**Mail id** — .[📨](jayanthchennoju@gmail.com).
 
+Feel free to collaborate with us: 
+I warmly welcome contributions from the community. Please feel free to fork the project, make improvements, or submit a pull request.
 ---
 
 ## 📄 License
