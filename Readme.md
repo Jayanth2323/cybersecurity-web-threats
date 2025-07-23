@@ -88,9 +88,7 @@ cybersecurity-web-threats/
  
 I warmly welcome contributions from the community. Please feel free to fork the project, make improvements, or submit a pull request.
 
-Feel free to collaborate with us:
-
-**Mail id** — .[**📧**](jayanthchennoju@gmail.com).
+Feel free to collaborate with us
 
 ---
 
