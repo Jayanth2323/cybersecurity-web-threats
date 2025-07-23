@@ -90,6 +90,7 @@ I warmly welcome contributions from the community. Please feel free to fork the 
 
 Feel free to collaborate with us:
 **Mail id** — .[**📧**](jayanthchennoju@gmail.com).
+
 ---
 
 ## 📄 License
